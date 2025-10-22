@@ -26,7 +26,7 @@ Eine moderne digitale Stadtverwaltungsplattform für die Stadt Schieder-Schwalen
 - **ORM**: Drizzle ORM
 - **Auth**: OAuth 2.0
 - **Build**: Vite, esbuild
-- **Deployment**: Vercel
+- **Deployment**: Netlify
 
 ## 📦 Installation
 
@@ -51,7 +51,7 @@ Eine moderne digitale Stadtverwaltungsplattform für die Stadt Schieder-Schwalen
 
 3. **Umgebungsvariablen konfigurieren**
    ```bash
-   cp .env.vercel.example .env
+   cp .env.netlify.example .env
    ```
    
    Bearbeiten Sie `.env` und fügen Sie Ihre Werte ein:
@@ -79,20 +79,21 @@ pnpm build
 
 Erstellt einen Production Build in `dist/`.
 
-## 🌐 Deployment auf Vercel
+## 🌐 Deployment auf Netlify
 
 ### Automatisches Deployment
 
-1. **Vercel Account erstellen** auf [vercel.com](https://vercel.com)
+1. **Netlify Account erstellen** auf [netlify.com](https://netlify.com)
 
-2. **Repository mit Vercel verbinden**
-   - "New Project" klicken
-   - GitHub Repository auswählen
+2. **Repository mit Netlify verbinden**
+   - "Add new site" → "Import an existing project" klicken
+   - GitHub auswählen
+   - Repository auswählen
    - Import bestätigen
 
 3. **Umgebungsvariablen setzen**
    
-   In Vercel Project Settings → Environment Variables:
+   In Netlify Site Settings → Environment Variables:
    ```
    DATABASE_URL=postgresql://...
    JWT_SECRET=your-secret
@@ -103,8 +104,8 @@ Erstellt einen Production Build in `dist/`.
    ```
 
 4. **Deploy**
-   - Vercel deployed automatisch bei jedem Push auf `main`
-   - Oder manuell über Vercel Dashboard
+   - Netlify deployed automatisch bei jedem Push auf `main`
+   - Oder manuell über Netlify Dashboard
 
 ### Supabase Setup
 

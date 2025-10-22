@@ -25,11 +25,11 @@ postgresql://postgres:[PASSWORD]@db.xxxxx.supabase.co:5432/postgres
 
 ---
 
-## Schritt 3: Vercel (2 Min)
+## Schritt 3: Netlify (2 Min)
 
-1. [vercel.com](https://vercel.com) → Sign up mit GitHub
-2. "Add New..." → "Project"
-3. Repository `buergerapp-schieder` auswählen
+1. [netlify.com](https://netlify.com) → Sign up mit GitHub
+2. "Add new site" → "Import an existing project"
+3. GitHub → Repository `buergerapp-schieder` auswählen
 4. Environment Variables hinzufügen:
 
 ```env
@@ -41,13 +41,13 @@ OAUTH_SERVER_URL=https://vidabiz.butterfly-effect.dev
 VITE_OAUTH_PORTAL_URL=https://vida.butterfly-effect.dev
 ```
 
-5. "Deploy" klicken
+5. "Deploy site" klicken
 
 ---
 
 ## ✅ Fertig!
 
-Ihre App ist jetzt live unter: `https://buergerapp-schieder.vercel.app`
+Ihre App ist jetzt live unter: `https://your-site-name.netlify.app`
 
 **Automatisches Deployment:**
 ```bash

@@ -1,6 +1,6 @@
-# Deployment Guide: Vercel + Supabase + GitHub
+# Deployment Guide: Netlify + Supabase + GitHub
 
-Diese Anleitung führt Sie Schritt für Schritt durch das Deployment der Bürger-App auf Vercel mit Supabase als Datenbank und automatischem Deployment über GitHub.
+Diese Anleitung führt Sie Schritt für Schritt durch das Deployment der Bürger-App auf Netlify mit Supabase als Datenbank und automatischem Deployment über GitHub.
 
 ## 📋 Übersicht
 
@@ -8,7 +8,7 @@ Nach diesem Setup:
 - ✅ Code liegt auf GitHub
 - ✅ Automatisches Deployment bei jedem Git Push
 - ✅ PostgreSQL Datenbank auf Supabase
-- ✅ Production-ready auf Vercel
+- ✅ Production-ready auf Netlify
 
 ---
 
@@ -76,49 +76,67 @@ postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxxxxxxx.supabase.co:5432/postgres
 
 ---
 
-## 3️⃣ Vercel Projekt erstellen
+## 3️⃣ Netlify Projekt erstellen
 
 ### Schritt 1: Account erstellen
-1. Gehen Sie zu [vercel.com](https://vercel.com)
+1. Gehen Sie zu [netlify.com](https://netlify.com)
 2. Klicken Sie auf "Sign Up"
 3. Melden Sie sich mit **GitHub** an (wichtig!)
-4. Autorisieren Sie Vercel für GitHub
+4. Autorisieren Sie Netlify für GitHub
 
-### Schritt 2: Projekt importieren
-1. Klicken Sie auf "Add New..." → "Project"
-2. Wählen Sie Ihr GitHub Repository `buergerapp-schieder`
-3. Falls nicht sichtbar: Klicken Sie auf "Adjust GitHub App Permissions"
+### Schritt 2: Neues Projekt erstellen
+1. Klicken Sie auf "Add new site" → "Import an existing project"
+2. Wählen Sie **GitHub**
+3. Autorisieren Sie Netlify (falls noch nicht geschehen)
+4. Wählen Sie Ihr Repository `buergerapp-schieder`
 
-### Schritt 3: Projekt konfigurieren
+### Schritt 3: Build Settings konfigurieren
 
-**Framework Preset**: Vite  
-**Root Directory**: `./` (Standard)  
-**Build Command**: `pnpm build`  
-**Output Directory**: `dist/public`
+Netlify erkennt die Settings automatisch aus `netlify.toml`, aber prüfen Sie:
+
+- **Branch to deploy**: `main`
+- **Build command**: `pnpm build`
+- **Publish directory**: `dist/public`
+- **Functions directory**: `netlify/functions`
 
 ### Schritt 4: Environment Variables setzen
 
-Klicken Sie auf "Environment Variables" und fügen Sie folgende Variablen hinzu:
+Klicken Sie auf "Site settings" → "Environment variables" → "Add a variable"
+
+Fügen Sie folgende Variablen hinzu:
 
 ```env
 # Datenbank (von Supabase)
-DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+DATABASE_URL
+postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 
 # Security
-JWT_SECRET=ihr-super-sicherer-jwt-secret-mindestens-32-zeichen
+JWT_SECRET
+ihr-super-sicherer-jwt-secret-mindestens-32-zeichen
 
 # App Configuration
-VITE_APP_ID=proj_buergerapp_schieder
-VITE_APP_TITLE=Bürger-App Schieder-Schwalenberg
-VITE_APP_LOGO=https://placehold.co/40x40/3b82f6/ffffff?text=S
+VITE_APP_ID
+proj_buergerapp_schieder
+
+VITE_APP_TITLE
+Bürger-App Schieder-Schwalenberg
+
+VITE_APP_LOGO
+https://placehold.co/40x40/3b82f6/ffffff?text=S
 
 # OAuth
-OAUTH_SERVER_URL=https://vidabiz.butterfly-effect.dev
-VITE_OAUTH_PORTAL_URL=https://vida.butterfly-effect.dev
+OAUTH_SERVER_URL
+https://vidabiz.butterfly-effect.dev
+
+VITE_OAUTH_PORTAL_URL
+https://vida.butterfly-effect.dev
 
 # Optional: Analytics
-VITE_ANALYTICS_ENDPOINT=https://umami.dev.ops.butterfly-effect.dev
-VITE_ANALYTICS_WEBSITE_ID=analytics_proj_buergerapp_schieder
+VITE_ANALYTICS_ENDPOINT
+https://umami.dev.ops.butterfly-effect.dev
+
+VITE_ANALYTICS_WEBSITE_ID
+analytics_proj_buergerapp_schieder
 ```
 
 **Wichtig**: 
@@ -126,9 +144,9 @@ VITE_ANALYTICS_WEBSITE_ID=analytics_proj_buergerapp_schieder
 - Generieren Sie einen sicheren `JWT_SECRET` (z.B. mit `openssl rand -base64 32`)
 
 ### Schritt 5: Deploy
-1. Klicken Sie auf "Deploy"
+1. Klicken Sie auf "Deploy site"
 2. ⏱️ Der erste Build dauert ca. 2-3 Minuten
-3. Nach erfolgreichem Build erhalten Sie eine URL: `https://buergerapp-schieder.vercel.app`
+3. Nach erfolgreichem Build erhalten Sie eine URL: `https://your-site-name.netlify.app`
 
 ---
 
@@ -176,7 +194,7 @@ pnpm db:push
 cd /home/ubuntu/buergerapp-schieder
 
 # Änderung machen (z.B. README bearbeiten)
-echo "\n## Live auf Vercel! 🚀" >> README.md
+echo "\n## Live auf Netlify! 🚀" >> README.md
 
 # Commit und Push
 git add .
@@ -186,38 +204,42 @@ git push origin main
 
 ### Deployment verfolgen
 
-1. Gehen Sie zu Ihrem Vercel Dashboard
-2. Sie sehen automatisch einen neuen Deployment-Prozess
+1. Gehen Sie zu Ihrem Netlify Dashboard
+2. Sie sehen automatisch einen neuen Deployment-Prozess unter "Deploys"
 3. Nach ca. 1-2 Minuten ist die Änderung live!
 
 ---
 
 ## 6️⃣ Custom Domain einrichten (optional)
 
-### In Vercel:
+### In Netlify:
 
-1. Gehen Sie zu Ihrem Projekt → **Settings** → **Domains**
-2. Klicken Sie auf "Add Domain"
+1. Gehen Sie zu Ihrem Site → **Domain settings**
+2. Klicken Sie auf "Add custom domain"
 3. Geben Sie Ihre Domain ein (z.B. `buergerapp-schieder.de`)
 4. Folgen Sie den Anweisungen zur DNS-Konfiguration
 
 ### Bei Ihrem Domain-Anbieter:
 
-Fügen Sie folgende DNS-Einträge hinzu:
+Netlify zeigt Ihnen die DNS-Einträge an, die Sie hinzufügen müssen:
 
-**A Record:**
+**Für Apex Domain (buergerapp-schieder.de):**
 ```
 Type: A
 Name: @
-Value: 76.76.21.21
+Value: 75.2.60.5
 ```
 
-**CNAME Record:**
+**Für www Subdomain:**
 ```
 Type: CNAME
 Name: www
-Value: cname.vercel-dns.com
+Value: your-site-name.netlify.app
 ```
+
+### SSL-Zertifikat
+
+Netlify aktiviert automatisch ein kostenloses SSL-Zertifikat (Let's Encrypt) für Ihre Domain!
 
 ⏱️ DNS-Propagierung dauert 5 Minuten bis 48 Stunden.
 
@@ -238,10 +260,10 @@ git commit -m "Beschreibung der Änderung"
 # 3. Push
 git push origin main
 
-# 4. Automatisches Deployment auf Vercel! ✨
+# 4. Automatisches Deployment auf Netlify! ✨
 ```
 
-**Das war's!** Vercel deployed automatisch jede Änderung auf `main`.
+**Das war's!** Netlify deployed automatisch jede Änderung auf `main`.
 
 ---
 
@@ -260,27 +282,29 @@ pnpm build
 pnpm check
 ```
 
-### Vercel CLI (optional)
+### Netlify CLI (optional)
 
 ```bash
-# Vercel CLI installieren
-npm i -g vercel
+# Netlify CLI installieren
+npm i -g netlify-cli
 
-# Lokal mit Vercel-Umgebung testen
-vercel dev
+# Login
+netlify login
+
+# Lokal mit Netlify-Umgebung testen
+netlify dev
 
 # Manuell deployen
-vercel --prod
+netlify deploy --prod
 ```
 
 ### Logs anzeigen
 
-```bash
-# Vercel Logs in Echtzeit
-vercel logs --follow
-
-# Oder im Vercel Dashboard → Projekt → Deployments → Logs
-```
+1. Gehen Sie zu Netlify Dashboard
+2. Wählen Sie Ihr Site
+3. Klicken Sie auf "Deploys"
+4. Wählen Sie einen Deploy
+5. Sehen Sie die Build-Logs
 
 ---
 
@@ -293,14 +317,15 @@ vercel logs --follow
 **Lösung**:
 1. Prüfen Sie `package.json` auf fehlende Dependencies
 2. Führen Sie lokal `pnpm build` aus, um Fehler zu identifizieren
-3. Prüfen Sie die Vercel Build Logs
+3. Prüfen Sie die Netlify Build Logs im Dashboard
+4. Stellen Sie sicher, dass `pnpm-lock.yaml` committed ist
 
 ### Datenbank-Verbindung schlägt fehl
 
 **Problem**: "Connection refused" oder "Authentication failed"
 
 **Lösung**:
-1. Prüfen Sie `DATABASE_URL` in Vercel Environment Variables
+1. Prüfen Sie `DATABASE_URL` in Netlify Environment Variables
 2. Stellen Sie sicher, dass das Passwort korrekt ist
 3. Prüfen Sie, ob Supabase-Projekt aktiv ist
 4. Testen Sie die Verbindung lokal:
@@ -313,37 +338,51 @@ vercel logs --follow
 **Problem**: Änderungen an Environment Variables haben keine Wirkung
 
 **Lösung**:
-1. Gehen Sie zu Vercel → Settings → Environment Variables
+1. Gehen Sie zu Netlify → Site settings → Environment variables
 2. Ändern Sie die Variable
 3. **Wichtig**: Triggern Sie ein neues Deployment:
+   - Option 1: Gehen Sie zu Deploys → Trigger deploy → Deploy site
+   - Option 2: Git Push:
    ```bash
    git commit --allow-empty -m "Trigger redeploy"
    git push origin main
    ```
+
+### Functions funktionieren nicht
+
+**Problem**: API-Aufrufe schlagen fehl
+
+**Lösung**:
+1. Prüfen Sie, ob `netlify.toml` korrekt ist
+2. Prüfen Sie Function Logs: Netlify Dashboard → Functions
+3. Stellen Sie sicher, dass `serverless-http` installiert ist
+4. Prüfen Sie, ob die Build erfolgreich war
 
 ### Deployment dauert zu lange
 
 **Problem**: Build hängt oder dauert > 10 Minuten
 
 **Lösung**:
-1. Prüfen Sie Vercel Build Logs auf Fehler
-2. Canceln Sie das Deployment und versuchen Sie es erneut
-3. Prüfen Sie, ob `pnpm-lock.yaml` committed ist
+1. Prüfen Sie Netlify Build Logs auf Fehler
+2. Canceln Sie das Deployment: Deploys → Cancel deploy
+3. Versuchen Sie es erneut: Trigger deploy → Deploy site
+4. Prüfen Sie, ob `pnpm-lock.yaml` committed ist
 
 ---
 
 ## 📊 Monitoring & Analytics
 
-### Vercel Analytics
+### Netlify Analytics
 
-1. Gehen Sie zu Ihrem Projekt → **Analytics**
-2. Aktivieren Sie "Web Analytics" (kostenlos)
-3. Sehen Sie Besucher, Performance und mehr
+1. Gehen Sie zu Ihrem Site → **Analytics**
+2. Aktivieren Sie "Netlify Analytics" ($9/Monat, optional)
+3. Oder nutzen Sie Google Analytics (kostenlos)
 
 ### Supabase Monitoring
 
 1. Gehen Sie zu Ihrem Supabase Projekt → **Database**
 2. Sehen Sie Verbindungen, Queries und Performance
+3. Nutzen Sie **Logs** für Debugging
 
 ---
 
@@ -356,10 +395,15 @@ vercel logs --follow
 3. **Supabase Row Level Security (RLS)** aktivieren:
    ```sql
    ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-   -- Policies hinzufügen
+   
+   -- Policy für authentifizierte Benutzer
+   CREATE POLICY "Users can view their own data"
+     ON users FOR SELECT
+     USING (auth.uid() = id);
    ```
-4. **Vercel Environment Variables** sind verschlüsselt gespeichert
-5. **HTTPS** ist automatisch aktiviert
+4. **Netlify Environment Variables** sind verschlüsselt gespeichert
+5. **HTTPS** ist automatisch aktiviert (Let's Encrypt)
+6. **Deploy Previews** für Pull Requests aktivieren
 
 ---
 
@@ -367,11 +411,13 @@ vercel logs --follow
 
 ### Free Tier Limits:
 
-**Vercel (Hobby)**:
+**Netlify (Starter - Free)**:
 - ✅ 100 GB Bandwidth/Monat
-- ✅ Unbegrenzte Deployments
+- ✅ 300 Build-Minuten/Monat
+- ✅ Unbegrenzte Sites
 - ✅ Automatisches HTTPS
 - ✅ Custom Domains
+- ✅ Serverless Functions (125.000 Requests/Monat)
 
 **Supabase (Free)**:
 - ✅ 500 MB Datenbank
@@ -383,9 +429,26 @@ Für die meisten Städte ist der Free Tier ausreichend!
 
 ---
 
+## 🚀 Performance-Optimierung
+
+### Build-Zeit reduzieren
+
+1. **Caching aktivieren**: Netlify cached automatisch `node_modules`
+2. **Dependencies optimieren**: Entfernen Sie ungenutzte Pakete
+3. **Build-Plugins nutzen**: Z.B. `@netlify/plugin-lighthouse`
+
+### Ladezeit verbessern
+
+1. **Asset Optimization**: Netlify optimiert automatisch Bilder
+2. **CDN**: Netlify nutzt ein globales CDN
+3. **Prerendering**: Für statische Seiten
+
+---
+
 ## 📞 Support
 
-- **Vercel Docs**: [vercel.com/docs](https://vercel.com/docs)
+- **Netlify Docs**: [docs.netlify.com](https://docs.netlify.com)
+- **Netlify Community**: [answers.netlify.com](https://answers.netlify.com)
 - **Supabase Docs**: [supabase.com/docs](https://supabase.com/docs)
 - **GitHub Issues**: Erstellen Sie ein Issue im Repository
 
@@ -396,16 +459,41 @@ Für die meisten Städte ist der Free Tier ausreichend!
 - [ ] GitHub Repository erstellt
 - [ ] Supabase Projekt erstellt
 - [ ] DATABASE_URL kopiert
-- [ ] Vercel Projekt erstellt
+- [ ] Netlify Site erstellt
 - [ ] Environment Variables gesetzt
 - [ ] Erstes Deployment erfolgreich
 - [ ] Datenbank initialisiert
 - [ ] Automatisches Deployment getestet
 - [ ] Custom Domain eingerichtet (optional)
+- [ ] SSL-Zertifikat aktiv
+
+---
+
+## 🎯 Netlify-spezifische Features
+
+### Deploy Previews
+- Automatische Preview-URLs für Pull Requests
+- Testen Sie Änderungen vor dem Merge
+
+### Branch Deploys
+- Deployen Sie verschiedene Branches
+- Z.B. `staging` Branch für Tests
+
+### Split Testing
+- A/B Testing direkt in Netlify
+- Verschiedene Versionen parallel testen
+
+### Forms
+- Netlify Forms für Kontaktformulare
+- Spam-Schutz inklusive
+
+### Identity
+- Netlify Identity für Benutzer-Authentifizierung
+- Alternative zu OAuth (optional)
 
 ---
 
 **Herzlichen Glückwunsch! 🎉**
 
-Ihre Bürger-App ist jetzt live und wird bei jedem Git Push automatisch aktualisiert!
+Ihre Bürger-App ist jetzt live auf Netlify und wird bei jedem Git Push automatisch aktualisiert!
 
