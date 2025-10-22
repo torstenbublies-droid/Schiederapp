@@ -1,5 +1,5 @@
 import { load } from 'cheerio';
-import { db } from '../db';
+import { getDb } from '../db';
 import { news } from '../../drizzle/schema';
 import { nanoid } from 'nanoid';
 
@@ -22,63 +22,79 @@ export async function scrapeBekanntmachungen(): Promise<void> {
     
     const bekanntmachungen: Bekanntmachung[] = [];
     
-    // Parse the announcements from the page
-    // The structure shows announcements with title, date, and teaser
-    $('div.bekanntmachung, div.mitteilung, article').each((i, elem) => {
-      if (i >= 15) return false; // Limit to 15 items
-      
-      const $elem = $(elem);
-      const title = $elem.find('h2, h3, .title, strong').first().text().trim();
-      const dateText = $elem.find('.date, time, .datum').first().text().trim();
-      const teaser = $elem.find('p, .teaser, .beschreibung').first().text().trim();
-      const link = $elem.find('a').first().attr('href');
-      
-      if (title && dateText) {
-        bekanntmachungen.push({
-          title,
-          date: parseDate(dateText),
-          teaser: teaser || title,
-          sourceUrl: link ? makeAbsoluteUrl(link) : BEKANNTMACHUNGEN_URL
-        });
-      }
-    });
+    // Extract announcements - the page shows them in a structured list
+    const pageText = $('body').text();
     
-    // If the above structure doesn't work, try alternative parsing
-    if (bekanntmachungen.length === 0) {
-      // Look for date patterns and titles in the text
-      const text = $('body').text();
-      const datePattern = /(\d{2}\.\d{2}\.\d{4})/g;
-      const matches = text.matchAll(datePattern);
+    // Find all dates in DD.MM.YYYY format
+    const dateRegex = /(\d{2}\.\d{2}\.\d{4})/g;
+    const lines = pageText.split('\n').map(l => l.trim()).filter(l => l);
+    
+    for (let i = 0; i < lines.length && bekanntmachungen.length < 15; i++) {
+      const line = lines[i];
+      const dateMatch = line.match(dateRegex);
       
-      for (const match of matches) {
-        if (bekanntmachungen.length >= 15) break;
+      if (dateMatch && dateMatch[0]) {
+        const date = dateMatch[0];
         
-        const dateStr = match[0];
-        const index = match.index || 0;
-        // Get text around the date
-        const contextStart = Math.max(0, index - 200);
-        const contextEnd = Math.min(text.length, index + 500);
-        const context = text.substring(contextStart, contextEnd);
+        // Look for title in next few lines
+        let title = '';
+        let teaser = '';
         
-        // Try to extract title (usually before or after the date)
-        const lines = context.split('\n').map(l => l.trim()).filter(l => l.length > 10);
-        const title = lines.find(l => l.length > 20 && l.length < 200) || 'Bekanntmachung';
+        // Check next lines for title (usually 1-3 lines after date)
+        for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+          const nextLine = lines[j].trim();
+          
+          // Skip empty lines and very short lines
+          if (nextLine.length < 10) continue;
+          
+          // Skip lines that are just dates
+          if (nextLine.match(/^\d{2}\.\d{2}\.\d{4}$/)) break;
+          
+          // Skip navigation items
+          if (nextLine.match(/^(Mehr|mehr|Textanriss|überspringen|Seite:)$/)) continue;
+          
+          // This is likely the title
+          if (!title && nextLine.length > 15 && nextLine.length < 300) {
+            title = nextLine.replace(/Mehr$/, '').replace(/\s+/g, ' ').trim();
+            
+            // Get teaser from following lines
+            for (let k = j + 1; k < Math.min(j + 3, lines.length); k++) {
+              const teaserLine = lines[k].trim();
+              if (teaserLine.length > 20 && teaserLine.length < 500 && !teaserLine.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+                teaser = teaserLine.replace(/Mehr$/, '').replace(/\s+/g, ' ').trim();
+                break;
+              }
+            }
+            break;
+          }
+        }
         
-        bekanntmachungen.push({
-          title,
-          date: parseDate(dateStr),
-          teaser: context.substring(0, 300).trim(),
-          sourceUrl: BEKANNTMACHUNGEN_URL
-        });
+        if (title && title.length > 10) {
+          bekanntmachungen.push({
+            title: title.substring(0, 400), // Limit title length
+            date: parseDate(date),
+            teaser: teaser ? teaser.substring(0, 400) : title.substring(0, 200),
+            sourceUrl: BEKANNTMACHUNGEN_URL
+          });
+        }
       }
     }
     
-    console.log(`📊 Found ${bekanntmachungen.length} Bekanntmachungen`);
+    // Remove duplicates based on title
+    const uniqueBekanntmachungen = bekanntmachungen.filter((item, index, self) =>
+      index === self.findIndex((t) => t.title === item.title)
+    );
+    
+    console.log(`📊 Found ${uniqueBekanntmachungen.length} unique Bekanntmachungen`);
     
     // Store in database
-    const database = await db();
+    const database = await getDb();
+    if (!database) {
+      throw new Error('Database not available');
+    }
     
-    for (const item of bekanntmachungen) {
+    let savedCount = 0;
+    for (const item of uniqueBekanntmachungen) {
       try {
         await database.insert(news).values({
           id: `bekannt_${nanoid(12)}`,
@@ -91,13 +107,14 @@ export async function scrapeBekanntmachungen(): Promise<void> {
           createdAt: new Date()
         }).onConflictDoNothing();
         
-        console.log(`✅ Saved: ${item.title.substring(0, 50)}...`);
+        savedCount++;
+        console.log(`✅ Saved: ${item.title.substring(0, 60)}...`);
       } catch (error) {
-        console.error(`❌ Error saving item: ${error}`);
+        console.error(`❌ Error saving item "${item.title.substring(0, 40)}":`, error);
       }
     }
     
-    console.log('✅ Bekanntmachungen scraping completed');
+    console.log(`✅ Bekanntmachungen scraping completed: ${savedCount}/${uniqueBekanntmachungen.length} saved`);
     
   } catch (error) {
     console.error('❌ Error scraping Bekanntmachungen:', error);
@@ -115,15 +132,6 @@ function parseDate(dateStr: string): string {
   
   // Fallback to current date
   return new Date().toISOString().split('T')[0];
-}
-
-function makeAbsoluteUrl(url: string): string {
-  if (url.startsWith('http')) {
-    return url;
-  }
-  
-  const baseUrl = 'https://www.schieder-schwalenberg.de';
-  return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 }
 
 // Run immediately if called directly
