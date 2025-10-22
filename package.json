@@ -12,6 +12,7 @@
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "scrape:bekanntmachungen": "tsx server/scrapers/bekanntmachungen.ts",
+    "scrape:veranstaltungen": "tsx server/scrapers/veranstaltungen.ts",
     "cron:bekanntmachungen": "tsx server/cron/update-bekanntmachungen.ts"
   },
   "dependencies": {

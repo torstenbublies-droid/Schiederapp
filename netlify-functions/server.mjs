@@ -99,7 +99,7 @@ app.get('/api/departments', async (req, res) => {
   }
 });
 
-// Scraper endpoint
+// Scraper endpoints
 app.get('/api/scrape-bekanntmachungen', async (req, res) => {
   try {
     const { scrapeBekanntmachungen } = await import('../server/scrapers/bekanntmachungen.js');
@@ -108,6 +108,17 @@ app.get('/api/scrape-bekanntmachungen', async (req, res) => {
   } catch (error) {
     console.error('Error scraping:', error);
     res.status(500).json({ error: 'Failed to scrape bekanntmachungen', message: error.message });
+  }
+});
+
+app.get('/api/scrape-veranstaltungen', async (req, res) => {
+  try {
+    const { scrapeVeranstaltungen } = await import('../server/scrapers/veranstaltungen.js');
+    const result = await scrapeVeranstaltungen();
+    res.json(result);
+  } catch (error) {
+    console.error('Error scraping events:', error);
+    res.status(500).json({ error: 'Failed to scrape veranstaltungen', message: error.message });
   }
 });
 
