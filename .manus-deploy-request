@@ -1,0 +1,7 @@
+{
+  "project_id": "EAX7PxdeL7ceynTg4aQ2Ag",
+  "commit": "d03f217",
+  "message": "Remove Made with Manus badge",
+  "auto_deploy": true,
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}

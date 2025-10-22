@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM mayorInfo WHERE id = '1';\nINSERT INTO mayorInfo (id, name, position, party, photoUrl, email, phone, bio) VALUES \n('1', 'Jörg Bierwirth', 'Bürgermeister', NULL, '/mayor.jpg', 'rathaus@schieder-schwalenberg.de', '05282 / 601-0', 'Bürgermeister der Stadt Schieder-Schwalenberg');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3JJCpc74Mkdc2HW.root --database EAX7PxdeL7ceynTg4aQ2Ag --execute DELETE FROM mayorInfo WHERE id = '1';\nINSERT INTO mayorInfo (id, name, position, party, photoUrl, email, phone, bio) VALUES \n('1', 'Jörg Bierwirth', 'Bürgermeister', NULL, '/mayor.jpg', 'rathaus@schieder-schwalenberg.de', '05282 / 601-0', 'Bürgermeister der Stadt Schieder-Schwalenberg');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 51
+}

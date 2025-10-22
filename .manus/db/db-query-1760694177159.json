@@ -1,0 +1,22 @@
+{
+  "query": "SELECT * FROM mayorInfo;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3JJCpc74Mkdc2HW.root --database EAX7PxdeL7ceynTg4aQ2Ag --execute SELECT * FROM mayorInfo;",
+  "rows": [
+    {
+      "id": "mayor-current",
+      "name": "Dr. Torben Blome",
+      "party": "CDU",
+      "position": "Bürgermeister",
+      "photoUrl": "NULL",
+      "email": "buergermeister@schieder-schwalenberg.de",
+      "phone": "05282 / 26-41",
+      "bio": "Bürgermeister der Stadt Schieder-Schwalenberg seit 2020",
+      "calendarUrl": "NULL",
+      "updatedAt": "2025-10-17 09:28:06"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tparty\tposition\tphotoUrl\temail\tphone\tbio\tcalendarUrl\tupdatedAt\nmayor-current\tDr. Torben Blome\tCDU\tBürgermeister\tNULL\tbuergermeister@schieder-schwalenberg.de\t05282 / 26-41\tBürgermeister der Stadt Schieder-Schwalenberg seit 2020\tNULL\t2025-10-17 09:28:06\n",
+  "stderr": "",
+  "execution_time_ms": 153
+}

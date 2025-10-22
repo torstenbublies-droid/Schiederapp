@@ -1,0 +1,8 @@
+{
+  "query": "UPDATE mayor_info SET \n  name = 'Jörg Bierwirth',\n  position = 'Bürgermeister',\n  party = NULL,\n  email = 'rathaus@schieder-schwalenberg.de',\n  phone = '05282 / 601-0',\n  photo = '/mayor.jpg',\n  bio = 'Bürgermeister der Stadt Schieder-Schwalenberg'\nWHERE id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3JJCpc74Mkdc2HW.root --database EAX7PxdeL7ceynTg4aQ2Ag --execute UPDATE mayor_info SET \n  name = 'Jörg Bierwirth',\n  position = 'Bürgermeister',\n  party = NULL,\n  email = 'rathaus@schieder-schwalenberg.de',\n  phone = '05282 / 601-0',\n  photo = '/mayor.jpg',\n  bio = 'Bürgermeister der Stadt Schieder-Schwalenberg'\nWHERE id = 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'eax7pxdel7ceyntg4aq2ag.mayor_info' doesn't exist"
+  ]
+}
