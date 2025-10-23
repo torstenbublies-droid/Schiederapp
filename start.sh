@@ -15,5 +15,6 @@ echo "Checking dist/public directory..."
 ls -la dist/public/ || echo "dist/public/ not found!"
 echo ""
 echo "Starting server..."
+export NODE_ENV="production"
 exec node dist/index.js
 
