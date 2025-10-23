@@ -3,12 +3,8 @@ import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 import path from "path";
-import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -38,9 +34,9 @@ export async function setupVite(app: Express, server: Server) {
     console.log('[Vite] Handling request:', url);
 
     try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "../..",
+      // Use process.cwd() which is always available
+      const clientTemplate = path.join(
+        process.cwd(),
         "client",
         "index.html"
       );
@@ -61,8 +57,12 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // In production, dist/index.js is in the dist folder, and public is also in dist/public
+  // In production, the built files are in dist/public
   const distPath = path.join(process.cwd(), "dist", "public");
+  
+  console.log('[Static] Serving from:', distPath);
+  console.log('[Static] Directory exists:', fs.existsSync(distPath));
+  
   if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
@@ -73,6 +73,9 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    const indexPath = path.join(distPath, "index.html");
+    console.log('[Static] Sending index.html from:', indexPath);
+    res.sendFile(indexPath);
   });
 }
+
