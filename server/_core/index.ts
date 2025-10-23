@@ -66,6 +66,14 @@ async function startServer() {
 
   server.listen(port, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${port}/`);
+    console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`PORT: ${process.env.PORT}`);
+    console.log(`Server is ready to accept connections`);
+  });
+  
+  server.on('error', (error) => {
+    console.error('Server error:', error);
+    process.exit(1);
   });
 }
 
