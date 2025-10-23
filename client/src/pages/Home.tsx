@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import { 
   Newspaper, Calendar, Building2, FileText, Wrench, 
   Trash2, AlertTriangle, Palmtree, GraduationCap, 
-  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X 
+  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus 
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
@@ -47,7 +47,7 @@ export default function Home() {
     { title: "Notfall & Störungen", icon: <AlertTriangle size={28} />, href: "/alerts", color: "bg-red-600" },
     { title: "Tourismus & Freizeit", icon: <Palmtree size={28} />, href: "/tourism", color: "bg-secondary" },
     { title: "Bildung & Familie", icon: <GraduationCap size={28} />, href: "/education", color: "bg-purple-600" },
-    { title: "Wirtschaft & Bauen", icon: <HardHat size={28} />, href: "/business", color: "bg-amber-600" },
+    { title: "Vereine", icon: <UserPlus size={28} />, href: "/clubs", color: "bg-amber-600" },
     { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "/council", color: "bg-indigo-600" },
     { title: "Kontakt & Anliegen", icon: <Phone size={28} />, href: "/contact", color: "bg-primary" },
   ];

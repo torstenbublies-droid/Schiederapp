@@ -130,15 +130,32 @@ export async function createNews(data: InsertNews) {
 // Events functions
 export async function getAllEvents(limit = 100) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    // Fallback to mock data when database is not available
+    const { mockEvents } = await import('../client/src/data/mockEvents.js');
+    return mockEvents.slice(0, limit);
+  }
   return db.select().from(events).orderBy(desc(events.startDate)).limit(limit);
 }
 
 export async function getUpcomingEvents(limit = 50) {
   const db = await getDb();
-  if (!db) return [];
-  const now = new Date();
-  return db.select().from(events).where(gte(events.startDate, now)).orderBy(events.startDate).limit(limit);
+  if (!db) {
+    // Fallback to mock data when database is not available
+    const { mockEvents } = await import('../client/src/data/mockEvents.js');
+    const now = new Date();
+    return mockEvents.filter(event => new Date(event.startDate) >= now).slice(0, limit);
+  }
+  try {
+    const now = new Date();
+    return await db.select().from(events).where(gte(events.startDate, now)).orderBy(events.startDate).limit(limit);
+  } catch (error) {
+    console.warn('[Database] Error fetching events, using mock data:', error);
+    // Fallback to mock data on error
+    const { mockEvents } = await import('../client/src/data/mockEvents.js');
+    const now = new Date();
+    return mockEvents.filter(event => new Date(event.startDate) >= now).slice(0, limit);
+  }
 }
 
 export async function getEventById(id: string) {
