@@ -31,15 +31,20 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   
+  // Health check endpoint MUST be first - before any middleware
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+  
+  // Root endpoint for basic connectivity test
+  app.get('/ping', (req, res) => {
+    res.send('pong');
+  });
+  
   // Add request logging middleware
   app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
-  });
-  
-  // Health check endpoint for Railway
-  app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
   
   // Diagnostic endpoint
