@@ -1,16 +1,21 @@
-import { trpc } from "@/lib/trpc";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, FileText } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { mockBekanntmachungen } from "@/data/mockBekanntmachungen";
 
 export default function News() {
-  const { data: allNews, isLoading } = trpc.news.list.useQuery({ limit: 50 });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Only show Bekanntmachungen
-  const announcements = allNews?.filter(item => item.category === "Bekanntmachungen") || [];
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 500);
+  }, []);
+
+  const announcements = mockBekanntmachungen;
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,10 +71,6 @@ export default function News() {
 
                         {item.teaser && (
                           <p className="text-muted-foreground mb-3">{item.teaser}</p>
-                        )}
-
-                        {item.bodyMD && item.bodyMD !== item.teaser && (
-                          <p className="text-muted-foreground line-clamp-3">{item.bodyMD}</p>
                         )}
 
                         {item.sourceUrl && (
