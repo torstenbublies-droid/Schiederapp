@@ -34,9 +34,9 @@ export async function setupVite(app: Express, server: Server) {
     console.log('[Vite] Handling request:', url);
 
     try {
-      // Use process.cwd() which is always available
-      const clientTemplate = path.join(
-        process.cwd(),
+      const clientTemplate = path.resolve(
+        import.meta.dirname,
+        "../..",
         "client",
         "index.html"
       );
@@ -58,7 +58,7 @@ export async function setupVite(app: Express, server: Server) {
 
 export function serveStatic(app: Express) {
   // In production, the built files are in dist/public
-  const distPath = path.join(process.cwd(), "dist", "public");
+  const distPath = path.join(import.meta.dirname, "public");
   
   console.log('[Static] Serving from:', distPath);
   console.log('[Static] Directory exists:', fs.existsSync(distPath));
