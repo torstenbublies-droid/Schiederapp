@@ -58,7 +58,11 @@ export async function setupVite(app: Express, server: Server) {
 
 export function serveStatic(app: Express) {
   // In production, the built files are in dist/public
+  // import.meta.dirname will be /app/dist in production on Railway
   const distPath = path.join(import.meta.dirname, "public");
+  
+  console.log('[Static] import.meta.dirname:', import.meta.dirname);
+  console.log('[Static] Resolved distPath:', distPath);
   
   console.log('[Static] Serving from:', distPath);
   console.log('[Static] Directory exists:', fs.existsSync(distPath));
