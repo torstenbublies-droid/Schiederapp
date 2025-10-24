@@ -1,5 +1,6 @@
 import { invokeLLM } from "./_core/llm";
 import * as db from "./db";
+import { stadtWebsiteScraper } from "./services/stadtWebsiteScraper";
 
 /**
  * Erkennt, ob eine Frage lokal (Schieder-Schwalenberg) oder global ist
@@ -64,6 +65,10 @@ export async function searchLocalContext(query: string) {
     mayor: null,
     alerts: [],
     waste: [],
+    stadtWebsite: {
+      mitteilungen: [],
+      veranstaltungen: [],
+    },
   };
 
   // Suche nach relevanten Bereichen basierend auf Keywords
@@ -84,6 +89,18 @@ export async function searchLocalContext(query: string) {
   }
 
   // Müll-Termine werden über die waste Router abgerufen
+
+  // Hole aktuelle Informationen von der Stadt-Website
+  try {
+    const [mitteilungen, veranstaltungen] = await Promise.all([
+      stadtWebsiteScraper.getMitteilungen(),
+      stadtWebsiteScraper.getVeranstaltungen(),
+    ]);
+    results.stadtWebsite.mitteilungen = mitteilungen.slice(0, 5);
+    results.stadtWebsite.veranstaltungen = veranstaltungen.slice(0, 5);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Stadt-Website-Daten:', error);
+  }
 
   // Immer Basis-Kontext laden
   if (!results.news.length && !results.events.length && !results.mayor && !results.alerts.length) {
@@ -145,6 +162,30 @@ export function formatContextForPrompt(context: any): string {
   }
 
   // Abfalltermine werden bei Bedarf separat abgerufen
+
+  // Stadt-Website Informationen
+  if (context.stadtWebsite) {
+    if (context.stadtWebsite.mitteilungen && context.stadtWebsite.mitteilungen.length > 0) {
+      formatted += '\n**OFFIZIELLE MITTEILUNGEN VON SCHIEDER-SCHWALENBERG.DE:**\n';
+      context.stadtWebsite.mitteilungen.forEach((m: any) => {
+        formatted += `- ${m.title}`;
+        if (m.date) formatted += ` (${m.date})`;
+        formatted += '\n';
+        if (m.content) formatted += `  ${m.content.substring(0, 200)}...\n`;
+        if (m.url) formatted += `  Link: ${m.url}\n`;
+      });
+    }
+
+    if (context.stadtWebsite.veranstaltungen && context.stadtWebsite.veranstaltungen.length > 0) {
+      formatted += '\n**VERANSTALTUNGEN VON SCHIEDER-SCHWALENBERG.DE:**\n';
+      context.stadtWebsite.veranstaltungen.forEach((v: any) => {
+        formatted += `- ${v.title}`;
+        if (v.date) formatted += ` (${v.date})`;
+        formatted += '\n';
+        if (v.content) formatted += `  ${v.content.substring(0, 150)}...\n`;
+      });
+    }
+  }
 
   return formatted;
 }

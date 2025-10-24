@@ -7,9 +7,11 @@ import { invokeLLM } from "./_core/llm";
 import { performWebSearch, requiresWebSearch } from "./web-search";
 import { nanoid } from "nanoid";
 import * as db from "./db";
+import { stadtInfoRouter } from "./routers/stadtInfo";
 
 export const appRouter = router({
   system: systemRouter,
+  stadtInfo: stadtInfoRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
