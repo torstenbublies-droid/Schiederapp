@@ -11,20 +11,12 @@ export default function PushNotificationButton() {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Robust: wartet auf OneSignal-Init und behandelt alle Fälle
-    if (!window.OneSignalDeferred) {
-      window.OneSignalDeferred = [];
-    }
-
+    // OneSignal v16 SDK ist bereits im <head> eingebunden
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    
     window.OneSignalDeferred.push(async function(OneSignal: any) {
-      try {
-        // Init ist bereits im index.html, aber wir stellen sicher
-        console.log("[Push] OneSignal init fertig");
-      } catch (e) {
-        console.error("[Push] Init-Fehler:", e);
-      }
+      console.log("[Push] OneSignal bereit");
 
-      // Klick-Handler
       const btn = buttonRef.current;
       if (!btn) return;
 
@@ -37,19 +29,26 @@ export default function PushNotificationButton() {
             return;
           }
 
-          const perm = await OneSignal.Notifications.getPermission();
+          // v16: permission ist eine Property, kein Funktionsaufruf
+          const perm = await OneSignal.Notifications.permission; // "default" | "granted" | "denied"
           console.log("[Push] permission:", perm);
+
           if (perm === "denied") {
-            alert("Benachrichtigungen sind im Browser blockiert. Erlaube sie unter Seiteninfos (🔒) → Benachrichtigungen.");
+            alert("Benachrichtigungen sind im Browser blockiert. Klicke auf das Schloss-Icon → Benachrichtigungen: Zulassen.");
             return;
           }
           if (perm === "granted") {
-            alert("Schon abonniert ✅");
+            alert("Du bist bereits abonniert ✅");
             return;
           }
 
-          // v16: Prompt explizit öffnen
-          await OneSignal.Slidedown.promptPush();
+          const can = await OneSignal.Notifications.canRequestPermission();
+          if (!can) {
+            alert("Der Browser erlaubt aktuell keine Abfrage der Berechtigung.");
+            return;
+          }
+
+          await OneSignal.Slidedown.promptPush(); // öffnet den System-Dialog
           console.log("[Push] Prompt geöffnet");
         } catch (e) {
           console.error("[Push] Prompt-Fehler:", e);
@@ -73,14 +72,17 @@ export default function PushNotificationButton() {
         fontSize: "1rem",
         fontWeight: "500",
         transition: "all 0.2s",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = "#2563eb";
         e.currentTarget.style.transform = "scale(1.05)";
+        e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = "#3b82f6";
         e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
       }}
     >
       🔔 Benachrichtigungen aktivieren
