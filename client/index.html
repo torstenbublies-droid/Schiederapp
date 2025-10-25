@@ -23,7 +23,9 @@
 
         try {
           await OneSignal.init({
-            appId: "5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc"  // <— DEINE App ID
+            appId: "5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc",  // <— DEINE App ID
+            serviceWorkerParam: { scope: '/' },
+            serviceWorkerPath: '/OneSignalSDKWorker.js'
             // safariWebId: "…", // nur falls konfiguriert
           });
           console.log("[Push] OneSignal init OK");
