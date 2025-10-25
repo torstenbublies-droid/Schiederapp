@@ -1,6 +1,7 @@
 import { invokeLLM } from "./_core/llm";
 import * as db from "./db";
 import { stadtWebsiteScraper } from "./services/stadtWebsiteScraper";
+import { getKnowledgeBaseContext } from "./knowledge-base";
 
 /**
  * Erkennt, ob eine Frage lokal (Schieder-Schwalenberg) oder global ist
@@ -13,10 +14,10 @@ export function isLocalQuery(query: string): boolean {
     'schieder', 'schwalenberg', 'rathaus', 'bürgermeister', 'stadt',
     'öffnungszeiten', 'veranstaltung', 'event', 'termin',
     'müll', 'abfall', 'störung', 'notfall', 'warnung',
-    'badeanstalt', 'schwimmbad', 'bibliothek', 'kita', 'schule',
+    'badeanstalt', 'schwimmbad', 'freibad', 'bibliothek', 'kita', 'schule',
     'amt', 'behörde', 'verwaltung', 'bürgerbüro',
     'mängelmelder', 'schadensmeldung',
-    'hier', 'bei uns', 'in der stadt'
+    'hier', 'bei uns', 'in der stadt', 'marco', 'müllers'
   ];
   
   // Globale Keywords - wenn diese vorkommen UND keine lokalen Keywords, ist es eine globale Frage
@@ -248,31 +249,33 @@ export function generateDeepLinks(query: string): string {
  * Erstellt das optimierte System-Prompt für LOKALE Fragen
  */
 export function createLocalSystemPrompt(contextData: string): string {
+  // Hole die Wissensdatenbank
+  const knowledgeBase = getKnowledgeBaseContext();
+  
   return `Du bist der "Schwalenbot", der digitale Assistent der Stadt Schieder-Schwalenberg.
 
 === KERNPRINZIPIEN ===
 1. **Lokale Frage**: Diese Frage bezieht sich auf Schieder-Schwalenberg
    
-2. **Datenquelle**: Nutze die unten stehenden AKTUELLEN DATEN aus der Stadt-Datenbank als Primärquelle
+2. **Datenquelle**: Nutze die unten stehenden AKTUELLEN DATEN aus der Stadt-Datenbank und der Wissensdatenbank als Primärquelle
    
 3. **Datenschutz**: Gib keine personenbezogenen Daten ohne explizite Anfrage
    
 4. **Sprache**: Antworte in der Sprache der Anfrage (Deutsch oder Englisch)
 
+=== WISSENSDATENBANK SCHIEDER-SCHWALENBERG ===
+${knowledgeBase}
+
 === AKTUELLE DATEN AUS DER STADT-DATENBANK ===
 ${contextData}
 
-**RATHAUS KONTAKT & ÖFFNUNGSZEITEN:**
-- Adresse: Rathausplatz 1, 32816 Schieder-Schwalenberg
-- Telefon: 05282 / 601-0
-- E-Mail: rathaus@schieder-schwalenberg.de
-- Öffnungszeiten: Mo-Fr 08:00-12:00 Uhr, Do 14:00-18:00 Uhr
-
 === ANTWORT-RICHTLINIEN ===
 - Gib konkrete Details (Adressen, Telefonnummern, Zeiten, Namen)
+- Bei Fragen zum Bürgermeister: Der aktuelle Bürgermeister ist Marco Müllers (seit 1. November 2025, parteilos)
+- Bei Fragen zum Freibad: Gib die vollständigen Öffnungszeiten und Kontaktdaten an
 - Sei freundlich, präzise und hilfreich
 - Strukturiere längere Antworten mit Absätzen
-- Nutze Emojis sparsam aber passend (📅 für Events, 📞 für Kontakt, etc.)
+- Nutze Emojis sparsam aber passend (📅 für Events, 📞 für Kontakt, 🏊 für Schwimmbad, etc.)
 - Wenn du auf Datenbank-Informationen verweist, gib die Quelle an
 
 Antworte jetzt auf die Frage des Bürgers.`;
