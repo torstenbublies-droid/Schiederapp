@@ -71,21 +71,37 @@ export async function searchLocalContext(query: string) {
     },
   };
 
-  // Suche nach relevanten Bereichen basierend auf Keywords
-  if (lowerQuery.includes('news') || lowerQuery.includes('nachricht') || lowerQuery.includes('aktuell')) {
-    results.news = await db.getAllNews(10);
+  // Suche nach relevanten Bereichen basierend auf Keywords (mit Fehlerbehandlung)
+  try {
+    if (lowerQuery.includes('news') || lowerQuery.includes('nachricht') || lowerQuery.includes('aktuell')) {
+      results.news = await db.getAllNews(10);
+    }
+  } catch (error) {
+    console.log('[Chat] Datenbank nicht erreichbar für News, verwende Stadt-Website-Daten');
   }
 
-  if (lowerQuery.includes('veranstaltung') || lowerQuery.includes('event') || lowerQuery.includes('termin') || lowerQuery.includes('heute') || lowerQuery.includes('morgen')) {
-    results.events = await db.getUpcomingEvents(10);
+  try {
+    if (lowerQuery.includes('veranstaltung') || lowerQuery.includes('event') || lowerQuery.includes('termin') || lowerQuery.includes('heute') || lowerQuery.includes('morgen')) {
+      results.events = await db.getUpcomingEvents(10);
+    }
+  } catch (error) {
+    console.log('[Chat] Datenbank nicht erreichbar für Events, verwende Stadt-Website-Daten');
   }
 
-  if (lowerQuery.includes('bürgermeister') || lowerQuery.includes('mayor')) {
-    results.mayor = await db.getMayorInfo();
+  try {
+    if (lowerQuery.includes('bürgermeister') || lowerQuery.includes('mayor')) {
+      results.mayor = await db.getMayorInfo();
+    }
+  } catch (error) {
+    console.log('[Chat] Datenbank nicht erreichbar für Bürgermeister-Info');
   }
 
-  if (lowerQuery.includes('störung') || lowerQuery.includes('notfall') || lowerQuery.includes('warnung') || lowerQuery.includes('alert')) {
-    results.alerts = await db.getActiveAlerts();
+  try {
+    if (lowerQuery.includes('störung') || lowerQuery.includes('notfall') || lowerQuery.includes('warnung') || lowerQuery.includes('alert')) {
+      results.alerts = await db.getActiveAlerts();
+    }
+  } catch (error) {
+    console.log('[Chat] Datenbank nicht erreichbar für Alerts');
   }
 
   // Müll-Termine werden über die waste Router abgerufen
@@ -102,19 +118,23 @@ export async function searchLocalContext(query: string) {
     console.error('Fehler beim Abrufen der Stadt-Website-Daten:', error);
   }
 
-  // Immer Basis-Kontext laden
+  // Immer Basis-Kontext laden (mit Fehlerbehandlung)
   if (!results.news.length && !results.events.length && !results.mayor && !results.alerts.length) {
-    // Lade Standard-Kontext
-    const [news, events, mayor, alerts] = await Promise.all([
-      db.getAllNews(3),
-      db.getUpcomingEvents(3),
-      db.getMayorInfo(),
-      db.getActiveAlerts(),
-    ]);
-    results.news = news;
-    results.events = events;
-    results.mayor = mayor;
-    results.alerts = alerts;
+    try {
+      // Lade Standard-Kontext
+      const [news, events, mayor, alerts] = await Promise.all([
+        db.getAllNews(3).catch(() => []),
+        db.getUpcomingEvents(3).catch(() => []),
+        db.getMayorInfo().catch(() => null),
+        db.getActiveAlerts().catch(() => []),
+      ]);
+      results.news = news;
+      results.events = events;
+      results.mayor = mayor;
+      results.alerts = alerts;
+    } catch (error) {
+      console.log('[Chat] Datenbank nicht erreichbar, verwende nur Stadt-Website-Daten');
+    }
   }
 
   return results;
