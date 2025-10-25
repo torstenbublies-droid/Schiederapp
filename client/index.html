@@ -13,11 +13,25 @@
     <!-- OneSignal Push Notifications -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
+      // Schutz gegen doppelte Initialisierung
       window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.__osInitOnce = false;
+
       OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "5a9de2d-f692-4e8c-9b3b-4233fe2b1ecc",
-        });
+        if (window.__osInitOnce) return;
+        window.__osInitOnce = true;
+
+        try {
+          await OneSignal.init({
+            appId: "5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc"  // <— DEINE App ID
+            // safariWebId: "…", // nur falls konfiguriert
+          });
+          console.log("[Push] OneSignal init OK");
+        } catch (e) {
+          console.error("[Push] Init-Fehler:", e);
+          // Wenn hier wieder AppID-Fehler steht, ist es NICHT die gleiche App-ID wie im Dashboard
+          alert("OneSignal Init fehlgeschlagen – prüfe App ID und Site URL.");
+        }
       });
     </script>
   </head>

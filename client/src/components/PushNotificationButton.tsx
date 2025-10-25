@@ -11,48 +11,33 @@ export default function PushNotificationButton() {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Im <head> muss stehen:
-    // <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal: any) {
-      try {
-        await OneSignal.init({
-          appId: "5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc" // exakt aus Settings → Keys & IDs
-          // safariWebId: "HIER-DEINE-SAFARI-WEB-ID" // optional, nur wenn konfiguriert
-        });
-        console.log("[Push] OneSignal bereit");
-      } catch (e) {
-        console.error("[Push] Init-Fehler:", e);
-        alert("OneSignal Init fehlgeschlagen – prüfe App ID und Site URL.");
-        return;
-      }
-
+    window.OneSignalDeferred.push(async function(OneSignal: any) {
       const btn = buttonRef.current;
       if (!btn) return;
 
       btn.addEventListener("click", async () => {
         try {
           const supported = await OneSignal.Notifications.isPushSupported();
-          console.log("[Push] supported:", supported);
           if (!supported) {
-            alert("Dein Browser unterstützt Web-Push hier nicht (z. B. iOS-Safari ohne PWA).");
+            alert("Dieser Browser unterstützt hier kein Web-Push (z. B. iOS-Safari ohne PWA).");
             return;
           }
 
-          const perm = await OneSignal.Notifications.permission; // "default" | "granted" | "denied"
+          // v16: permission ist eine Property ("default" | "granted" | "denied")
+          const perm = await OneSignal.Notifications.permission;
           console.log("[Push] permission:", perm);
 
           if (perm === "denied") {
-            alert("Benachrichtigungen sind im Browser blockiert. Klicke auf das Schloss-Icon → Benachrichtigungen: Zulassen.");
+            alert("Benachrichtigungen sind im Browser blockiert. Schloss-Icon → Benachrichtigungen: Zulassen.");
             return;
           }
           if (perm === "granted") {
-            alert("Du bist bereits abonniert ✅");
+            alert("Schon abonniert ✅");
             return;
           }
 
-          await OneSignal.Slidedown.promptPush(); // öffnet den System-Dialog
+          await OneSignal.Slidedown.promptPush(); // System-Dialog anzeigen
           console.log("[Push] Prompt geöffnet");
         } catch (e) {
           console.error("[Push] Prompt-Fehler:", e);
