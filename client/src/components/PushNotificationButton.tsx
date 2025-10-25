@@ -11,11 +11,22 @@ export default function PushNotificationButton() {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // OneSignal v16 SDK ist bereits im <head> eingebunden
+    // Im <head> muss stehen:
+    // <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    
-    window.OneSignalDeferred.push(async function(OneSignal: any) {
-      console.log("[Push] OneSignal bereit");
+    OneSignalDeferred.push(async function(OneSignal: any) {
+      try {
+        await OneSignal.init({
+          appId: "5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc" // exakt aus Settings → Keys & IDs
+          // safariWebId: "HIER-DEINE-SAFARI-WEB-ID" // optional, nur wenn konfiguriert
+        });
+        console.log("[Push] OneSignal bereit");
+      } catch (e) {
+        console.error("[Push] Init-Fehler:", e);
+        alert("OneSignal Init fehlgeschlagen – prüfe App ID und Site URL.");
+        return;
+      }
 
       const btn = buttonRef.current;
       if (!btn) return;
@@ -29,7 +40,6 @@ export default function PushNotificationButton() {
             return;
           }
 
-          // v16: permission ist eine Property, kein Funktionsaufruf
           const perm = await OneSignal.Notifications.permission; // "default" | "granted" | "denied"
           console.log("[Push] permission:", perm);
 
@@ -39,12 +49,6 @@ export default function PushNotificationButton() {
           }
           if (perm === "granted") {
             alert("Du bist bereits abonniert ✅");
-            return;
-          }
-
-          const can = await OneSignal.Notifications.canRequestPermission();
-          if (!can) {
-            alert("Der Browser erlaubt aktuell keine Abfrage der Berechtigung.");
             return;
           }
 
