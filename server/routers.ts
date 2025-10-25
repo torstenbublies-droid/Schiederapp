@@ -276,17 +276,22 @@ export const appRouter = router({
             assistantMessage += deepLinks;
           }
 
-          // Log the chat
-          await db.createChatLog({
-            id: nanoid(),
-            userId: ctx.user?.id,
-            sessionId: input.sessionId,
-            message: input.message,
-            response: assistantMessage,
-            intent: "general",
-            isLocal: isLocal,
-            tokens: response.usage?.total_tokens,
-          });
+          // Log the chat (non-blocking, ignore errors)
+          try {
+            await db.createChatLog({
+              id: nanoid(),
+              userId: ctx.user?.id,
+              sessionId: input.sessionId,
+              message: input.message,
+              response: assistantMessage,
+              intent: "general",
+              isLocal: isLocal,
+              tokens: response.usage?.total_tokens,
+            });
+          } catch (dbError) {
+            console.warn("Failed to log chat to database:", dbError);
+            // Continue anyway - logging is not critical
+          }
 
           return {
             response: assistantMessage,
