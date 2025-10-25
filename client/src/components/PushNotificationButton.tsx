@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from 'react';
 
 declare global {
   interface Window {
@@ -8,73 +8,133 @@ declare global {
 }
 
 export default function PushNotificationButton() {
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    window.OneSignalDeferred.push(async function(OneSignal: any) {
-      const btn = buttonRef.current;
-      if (!btn) return;
-
-      btn.addEventListener("click", async () => {
-        try {
-          const supported = await OneSignal.Notifications.isPushSupported();
-          if (!supported) {
-            alert("Dieser Browser unterstützt hier kein Web-Push (z. B. iOS-Safari ohne PWA).");
-            return;
-          }
-
-          // v16: permission ist eine Property ("default" | "granted" | "denied")
-          const perm = await OneSignal.Notifications.permission;
-          console.log("[Push] permission:", perm);
-
-          if (perm === "denied") {
-            alert("Benachrichtigungen sind im Browser blockiert. Schloss-Icon → Benachrichtigungen: Zulassen.");
-            return;
-          }
-          if (perm === "granted") {
-            alert("Schon abonniert ✅");
-            return;
-          }
-
-          await OneSignal.Slidedown.promptPush(); // System-Dialog anzeigen
-          console.log("[Push] Prompt geöffnet");
-        } catch (e) {
-          console.error("[Push] Prompt-Fehler:", e);
-          alert("Konnte den Prompt nicht öffnen – Details in der Konsole (F12).");
-        }
-      });
-    });
+    // Check if already subscribed
+    checkSubscriptionStatus();
   }, []);
+
+  const checkSubscriptionStatus = async () => {
+    if (!('Notification' in window)) return;
+    
+    const permission = Notification.permission;
+    setIsSubscribed(permission === 'granted');
+  };
+
+  const handleEnablePush = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Check if notifications are supported
+      if (!('Notification' in window)) {
+        alert('Dein Browser unterstützt keine Push-Benachrichtigungen.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if service worker is supported
+      if (!('serviceWorker' in navigator)) {
+        alert('Dein Browser unterstützt keine Service Worker.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check current permission
+      const currentPermission = Notification.permission;
+      console.log('[Push] Current permission:', currentPermission);
+
+      if (currentPermission === 'denied') {
+        alert('Benachrichtigungen sind blockiert. Bitte erlaube sie in den Browser-Einstellungen (Schloss-Icon → Benachrichtigungen).');
+        setIsLoading(false);
+        return;
+      }
+
+      if (currentPermission === 'granted') {
+        alert('Du hast Benachrichtigungen bereits aktiviert! ✅');
+        setIsSubscribed(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Request permission using native browser API
+      console.log('[Push] Requesting permission...');
+      const permission = await Notification.requestPermission();
+      console.log('[Push] Permission result:', permission);
+
+      if (permission === 'granted') {
+        console.log('[Push] Permission granted! Subscribing to OneSignal...');
+        
+        // Wait for OneSignal to be ready
+        if (window.OneSignal) {
+          try {
+            // Subscribe to OneSignal
+            await window.OneSignal.Notifications.requestPermission();
+            console.log('[Push] OneSignal subscription successful!');
+            
+            setIsSubscribed(true);
+            alert('Benachrichtigungen erfolgreich aktiviert! 🎉');
+          } catch (error) {
+            console.error('[Push] OneSignal subscription error:', error);
+            alert('Benachrichtigungen wurden erlaubt, aber die Registrierung bei OneSignal ist fehlgeschlagen.');
+          }
+        } else {
+          console.warn('[Push] OneSignal not available');
+          alert('Benachrichtigungen wurden erlaubt, aber OneSignal ist noch nicht geladen.');
+        }
+      } else if (permission === 'denied') {
+        alert('Du hast Benachrichtigungen abgelehnt. Du kannst sie später in den Browser-Einstellungen aktivieren.');
+      } else {
+        console.log('[Push] Permission dismissed');
+      }
+    } catch (error) {
+      console.error('[Push] Error:', error);
+      alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <button
-      ref={buttonRef}
-      id="enable-push"
+      onClick={handleEnablePush}
+      disabled={isLoading}
       style={{
-        padding: "0.6rem 1rem",
-        borderRadius: "0.5rem",
-        backgroundColor: "#3b82f6",
-        color: "white",
-        border: "none",
-        cursor: "pointer",
-        fontSize: "1rem",
-        fontWeight: "500",
-        transition: "all 0.2s",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        padding: '0.75rem 1.5rem',
+        borderRadius: '0.5rem',
+        border: 'none',
+        backgroundColor: isSubscribed ? '#10b981' : '#3b82f6',
+        color: 'white',
+        fontSize: '1rem',
+        fontWeight: '500',
+        cursor: isLoading ? 'wait' : 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        margin: '1rem auto',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        transition: 'all 0.2s',
+        opacity: isLoading ? 0.7 : 1
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#2563eb";
-        e.currentTarget.style.transform = "scale(1.05)";
-        e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
+        if (!isLoading) {
+          e.currentTarget.style.transform = 'translateY(-1px)';
+          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+        }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "#3b82f6";
-        e.currentTarget.style.transform = "scale(1)";
-        e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
       }}
     >
-      🔔 Benachrichtigungen aktivieren
+      {isLoading ? (
+        <>⏳ Lädt...</>
+      ) : isSubscribed ? (
+        <>✅ Benachrichtigungen aktiv</>
+      ) : (
+        <>🔔 Benachrichtigungen aktivieren</>
+      )}
     </button>
   );
 }
