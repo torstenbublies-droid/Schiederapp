@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
 import WeatherWidget from "@/components/WeatherWidget";
+import PushNotificationButton from "@/components/PushNotificationButton";
 
 interface TileProps {
   title: string;
@@ -105,6 +106,11 @@ export default function Home() {
             </Card>
           </div>
         )}
+
+        {/* Push Notification Button */}
+        <div className="mb-6 flex justify-center">
+          <PushNotificationButton />
+        </div>
 
         {/* Tiles Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
