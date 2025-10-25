@@ -17,6 +17,17 @@
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.__osInitOnce = false;
 
+      // Manually register service worker first
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/OneSignalSDKWorker.js', { scope: '/' })
+          .then(registration => {
+            console.log('[Push] Service Worker registered manually:', registration.scope);
+          })
+          .catch(error => {
+            console.error('[Push] Service Worker registration failed:', error);
+          });
+      }
+
       OneSignalDeferred.push(async function(OneSignal) {
         if (window.__osInitOnce) return;
         window.__osInitOnce = true;
