@@ -96,6 +96,11 @@ export default function PushNotificationButton() {
     }
   };
 
+  // Don't show button if already subscribed
+  if (isSubscribed) {
+    return null;
+  }
+
   return (
     <button
       onClick={handleEnablePush}
@@ -104,7 +109,7 @@ export default function PushNotificationButton() {
         padding: '0.75rem 1.5rem',
         borderRadius: '0.5rem',
         border: 'none',
-        backgroundColor: isSubscribed ? '#10b981' : '#3b82f6',
+        backgroundColor: '#3b82f6',
         color: 'white',
         fontSize: '1rem',
         fontWeight: '500',
@@ -130,8 +135,6 @@ export default function PushNotificationButton() {
     >
       {isLoading ? (
         <>⏳ Lädt...</>
-      ) : isSubscribed ? (
-        <>✅ Benachrichtigungen aktiv</>
       ) : (
         <>🔔 Benachrichtigungen aktivieren</>
       )}
