@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Bell, Trash2, CheckCheck, Loader2, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +11,6 @@ import PushNotificationButton from "@/components/PushNotificationButton";
 
 export default function Notifications() {
   // Using sonner toast
-  const navigate = useNavigate();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { playerId, isLoading: playerIdLoading } = useOneSignalPlayerId();
 
@@ -94,7 +92,7 @@ export default function Notifications() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => window.location.href = '/'}
                 className="hover:bg-blue-700 p-2 rounded-lg transition-colors"
                 aria-label="Zurück zur Startseite"
               >
