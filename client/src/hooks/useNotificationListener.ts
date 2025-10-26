@@ -2,17 +2,9 @@ import { useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useOneSignalPlayerId } from './useOneSignalPlayerId';
 
-declare global {
-  interface Window {
-    OneSignal?: any;
-  }
-}
-
-const DB_NAME = 'NotificationStorage';
-const STORE_NAME = 'pendingNotifications';
-
 /**
- * Hook that syncs notifications from IndexedDB to database
+ * Hook that listens for push notifications from the service worker
+ * and saves them to the database
  */
 export function useNotificationListener() {
   const utils = trpc.useUtils();
@@ -20,117 +12,49 @@ export function useNotificationListener() {
   const createNotificationMutation = trpc.userNotifications.create.useMutation();
 
   useEffect(() => {
-    // Function to get Player ID (with retry)
-    const getPlayerId = async (): Promise<string | null> => {
-      // Try from hook first
-      if (playerId) return playerId;
-      
-      // Try from localStorage
-      const storedId = localStorage.getItem('oneSignalPlayerId');
-      if (storedId) return storedId;
-      
-      // Try from OneSignal directly
-      if (window.OneSignal) {
+    // Listen for messages from service worker
+    const handleMessage = async (event: MessageEvent) => {
+      // Only handle messages from our service worker
+      if (event.data && event.data.type === 'PUSH_NOTIFICATION_RECEIVED') {
+        console.log('[Notification Listener] Received notification from service worker:', event.data);
+        
+        if (!playerId) {
+          console.warn('[Notification Listener] No Player ID yet, cannot save notification');
+          return;
+        }
+        
         try {
-          await window.OneSignal.init({ appId: '5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc' });
-          const id = await window.OneSignal.User.PushSubscription.id;
-          if (id) {
-            localStorage.setItem('oneSignalPlayerId', id);
-            return id;
-          }
-        } catch (e) {
-          console.error('[Notification Sync] Error getting Player ID from OneSignal:', e);
-        }
-      }
-      
-      return null;
-    };
-
-    // Function to sync pending notifications from IndexedDB to database
-    const syncPendingNotifications = async () => {
-      const playerIdToUse = await getPlayerId();
-      
-      if (!playerIdToUse) {
-        console.log('[Notification Sync] No Player ID yet, will retry in 5 seconds');
-        return;
-      }
-      
-      console.log('[Notification Sync] Using Player ID:', playerIdToUse);
-
-      try {
-        // Open IndexedDB
-        const db = await new Promise<IDBDatabase>((resolve, reject) => {
-          const request = indexedDB.open(DB_NAME);
-          request.onsuccess = () => resolve(request.result);
-          request.onerror = () => reject(request.error);
-        });
-
-        // Get all pending notifications
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const getAllRequest = store.getAll();
-
-        const notifications = await new Promise<any[]>((resolve, reject) => {
-          getAllRequest.onsuccess = () => resolve(getAllRequest.result);
-          getAllRequest.onerror = () => reject(getAllRequest.error);
-        });
-
-        console.log('[Notification Sync] Found', notifications.length, 'pending notifications');
-
-        // Save each notification to database
-        for (const notification of notifications) {
-          try {
-            await createNotificationMutation.mutateAsync({
-              oneSignalPlayerId: playerIdToUse,
-              title: notification.title || 'Benachrichtigung',
-              message: notification.body || '',
-              type: 'info',
-              data: notification.data ? JSON.stringify(notification.data) : null,
-            });
-
-            console.log('[Notification Sync] Saved notification:', notification.title);
-
-            // Delete from IndexedDB after successful save
-            const deleteTransaction = db.transaction([STORE_NAME], 'readwrite');
-            const deleteStore = deleteTransaction.objectStore(STORE_NAME);
-            deleteStore.delete(notification.id);
-          } catch (error) {
-            console.error('[Notification Sync] Error saving notification:', error);
-          }
-        }
-
-        if (notifications.length > 0) {
-          // Invalidate queries to refresh UI
+          // Generate unique ID
+          const notificationId = 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          
+          // Save to database
+          await createNotificationMutation.mutateAsync({
+            oneSignalPlayerId: playerId,
+            id: notificationId,
+            title: event.data.title,
+            message: event.data.body,
+            type: event.data.data?.type || 'info',
+            data: event.data.data || null,
+          });
+          
+          console.log('[Notification Listener] ✅ Notification saved to database');
+          
+          // Invalidate queries to update UI
           utils.userNotifications.list.invalidate();
           utils.userNotifications.unreadCount.invalidate();
+        } catch (error) {
+          console.error('[Notification Listener] ❌ Error saving notification:', error);
         }
-
-        db.close();
-      } catch (error) {
-        console.error('[Notification Sync] Error syncing notifications:', error);
       }
     };
 
-    // Listen for messages from service worker
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'NEW_NOTIFICATION') {
-        console.log('[Notification Sync] New notification from service worker');
-        // Sync immediately when we get a new notification
-        syncPendingNotifications();
-      }
-    };
-
+    // Register message listener
     navigator.serviceWorker?.addEventListener('message', handleMessage);
+    console.log('[Notification Listener] Registered service worker message listener');
 
-    // Sync on mount
-    syncPendingNotifications();
-
-    // Sync periodically (every 10 seconds)
-    const intervalId = setInterval(syncPendingNotifications, 10000);
-
+    // Cleanup
     return () => {
       navigator.serviceWorker?.removeEventListener('message', handleMessage);
-      clearInterval(intervalId);
     };
   }, [playerId, createNotificationMutation, utils]);
 }
