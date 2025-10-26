@@ -34,7 +34,7 @@ export function useNotificationListener() {
             title: event.data.title,
             message: event.data.body,
             type: event.data.data?.type || 'info',
-            data: event.data.data || null,
+            data: event.data.data ? JSON.stringify(event.data.data) : null,
           });
           
           console.log('[Notification Listener] ✅ Notification saved to database');
