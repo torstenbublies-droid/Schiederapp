@@ -1,99 +1,22 @@
 // OneSignal Service Worker for Push Notifications
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-// Helper function to save notification to database
-async function saveNotificationToDatabase(title, body, data) {
-  try {
-    // Get OneSignal Player ID from IndexedDB or data
-    let oneSignalPlayerId = null;
-    
-    // Try to get from notification data
-    if (data && data.oneSignalPlayerId) {
-      oneSignalPlayerId = data.oneSignalPlayerId;
-    }
-    
-    // Get all clients (open tabs/windows)
-    const allClients = await clients.matchAll({ includeUncontrolled: true, type: 'window' });
-    
-    if (allClients.length > 0) {
-      // Send message to the first client to save notification
-      allClients[0].postMessage({
-        type: 'SAVE_NOTIFICATION',
-        notification: {
-          title: title,
-          message: body,
-          data: data,
-          oneSignalPlayerId: oneSignalPlayerId
-        }
-      });
-      console.log('[Service Worker] Sent notification to client for saving');
-    } else {
-      console.log('[Service Worker] No clients available to save notification');
-    }
-  } catch (error) {
-    console.error('[Service Worker] Error saving notification:', error);
-  }
-}
-
-// Add push event handler
-self.addEventListener('push', function(event) {
-  console.log('[Service Worker] Push event received');
+// Listen for notification display events from OneSignal
+self.addEventListener('notificationclick', async function(event) {
+  console.log('[Service Worker] Notification clicked:', event.notification);
   
-  let title = 'Schieder-Schwalenberg';
-  let options = {
-    body: 'Neue Nachricht',
-    requireInteraction: false,
-    vibrate: [200, 100, 200]
-  };
-  
-  let notificationData = null;
-  
-  try {
-    if (event.data) {
-      const data = event.data.json();
-      console.log('[Service Worker] Push data:', data);
-      
-      // Handle OneSignal format
-      if (data.title) title = data.title;
-      if (data.body) options.body = data.body;
-      if (data.message) options.body = data.message;
-      if (data.icon) options.icon = data.icon;
-      if (data.url) {
-        options.data = { url: data.url };
-        notificationData = data;
-      }
-    }
-  } catch (e) {
-    console.log('[Service Worker] Using text data');
-    try {
-      if (event.data) {
-        options.body = event.data.text();
-      }
-    } catch (e2) {
-      console.error('[Service Worker] Error reading push data:', e2);
-    }
-  }
-  
-  console.log('[Service Worker] Showing notification with:', { title, options });
-  
-  event.waitUntil(
-    Promise.all([
-      self.registration.showNotification(title, options)
-        .then(() => console.log('[Service Worker] Notification shown successfully'))
-        .catch(err => console.error('[Service Worker] Error showing notification:', err)),
-      saveNotificationToDatabase(title, options.body, notificationData)
-    ])
-  );
-});
-
-// Add notification click handler
-self.addEventListener('notificationclick', function(event) {
-  console.log('[Service Worker] Notification clicked');
   event.notification.close();
   
-  const urlToOpen = (event.notification.data && event.notification.data.url) 
-    ? event.notification.data.url 
-    : 'https://schiederapp.onrender.com/';
+  // Get notification data
+  const notificationData = event.notification.data || {};
+  const title = event.notification.title;
+  const body = event.notification.body;
+  
+  // Save notification to database
+  await saveNotificationToDatabase(title, body, notificationData);
+  
+  // Open URL
+  const urlToOpen = notificationData.url || 'https://schiederapp.onrender.com/';
   
   event.waitUntil(
     clients.openWindow(urlToOpen)
@@ -102,14 +25,105 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
-// Add message handler
-self.addEventListener('message', function(event) {
-  console.log('[Service Worker] Message received:', event.data);
+// Listen for when OneSignal shows a notification
+self.addEventListener('push', async function(event) {
+  console.log('[Service Worker] Push event received');
   
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+  // Let OneSignal handle the notification display
+  // We'll save it to database when it's clicked or displayed
+  
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      console.log('[Service Worker] Push data:', data);
+      
+      const title = data.title || data.heading || 'Schieder-Schwalenberg';
+      const body = data.body || data.message || data.alert || 'Neue Nachricht';
+      
+      // Save to database immediately
+      await saveNotificationToDatabase(title, body, data);
+    } catch (e) {
+      console.error('[Service Worker] Error processing push:', e);
+    }
   }
 });
 
-console.log('[Service Worker] OneSignal Service Worker initialized');
+// Helper function to save notification to database
+async function saveNotificationToDatabase(title, body, data) {
+  try {
+    console.log('[Service Worker] Saving notification:', { title, body, data });
+    
+    // Get OneSignal Player ID from IndexedDB
+    let oneSignalPlayerId = null;
+    
+    // Try to get from notification data
+    if (data && data.oneSignalPlayerId) {
+      oneSignalPlayerId = data.oneSignalPlayerId;
+    }
+    
+    // Try to get from IndexedDB
+    if (!oneSignalPlayerId) {
+      try {
+        const db = await openIndexedDB();
+        oneSignalPlayerId = await getPlayerIdFromIndexedDB(db);
+      } catch (e) {
+        console.log('[Service Worker] Could not get Player ID from IndexedDB:', e);
+      }
+    }
+    
+    // Get all clients (open tabs/windows)
+    const allClients = await clients.matchAll({ includeUncontrolled: true, type: 'window' });
+    
+    if (allClients.length > 0) {
+      // Send message to all clients to save notification
+      allClients.forEach(client => {
+        client.postMessage({
+          type: 'SAVE_NOTIFICATION',
+          notification: {
+            title: title,
+            message: body,
+            data: data,
+            oneSignalPlayerId: oneSignalPlayerId
+          }
+        });
+      });
+      console.log('[Service Worker] Sent notification to clients for saving');
+    } else {
+      console.log('[Service Worker] No clients available to save notification');
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error saving notification:', error);
+  }
+}
+
+// Helper to open IndexedDB
+function openIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('ONE_SIGNAL_SDK_DB');
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Helper to get Player ID from IndexedDB
+function getPlayerIdFromIndexedDB(db) {
+  return new Promise((resolve, reject) => {
+    try {
+      const transaction = db.transaction(['Ids'], 'readonly');
+      const store = transaction.objectStore('Ids');
+      const request = store.get('userId');
+      
+      request.onsuccess = () => {
+        const playerId = request.result;
+        console.log('[Service Worker] Player ID from IndexedDB:', playerId);
+        resolve(playerId);
+      };
+      request.onerror = () => reject(request.error);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+console.log('[Service Worker] OneSignal Service Worker initialized with custom handlers');
 

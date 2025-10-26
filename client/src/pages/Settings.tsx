@@ -20,14 +20,7 @@ export default function Settings() {
   const [isLoading, setIsLoading] = useState(false);
   const [oneSignalPlayerId, setOneSignalPlayerId] = useState<string | null>(null);
 
-  const updatePushSettingsMutation = trpc.userNotifications.updatePushSettings.useMutation({
-    onSuccess: () => {
-      toast.success("Push-Benachrichtigungs-Einstellungen wurden aktualisiert.");
-    },
-    onError: () => {
-      toast.error("Die Einstellungen konnten nicht gespeichert werden.");
-    },
-  });
+  // No need to update database for push settings without user accounts
 
   useEffect(() => {
     checkPushStatus();
@@ -97,11 +90,8 @@ export default function Settings() {
           try {
             await window.OneSignal.User.PushSubscription.optOut();
             
-            // Update database
-            await updatePushSettingsMutation.mutateAsync({
-              oneSignalPlayerId: null,
-              pushEnabled: false,
-            });
+            // Clear localStorage
+            localStorage.removeItem('oneSignalPlayerId');
 
             setPushEnabled(false);
             setOneSignalPlayerId(null);
