@@ -20,14 +20,42 @@ export function useNotificationListener() {
   const createNotificationMutation = trpc.userNotifications.create.useMutation();
 
   useEffect(() => {
+    // Function to get Player ID (with retry)
+    const getPlayerId = async (): Promise<string | null> => {
+      // Try from hook first
+      if (playerId) return playerId;
+      
+      // Try from localStorage
+      const storedId = localStorage.getItem('oneSignalPlayerId');
+      if (storedId) return storedId;
+      
+      // Try from OneSignal directly
+      if (window.OneSignal) {
+        try {
+          await window.OneSignal.init({ appId: '5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc' });
+          const id = await window.OneSignal.User.PushSubscription.id;
+          if (id) {
+            localStorage.setItem('oneSignalPlayerId', id);
+            return id;
+          }
+        } catch (e) {
+          console.error('[Notification Sync] Error getting Player ID from OneSignal:', e);
+        }
+      }
+      
+      return null;
+    };
+
     // Function to sync pending notifications from IndexedDB to database
     const syncPendingNotifications = async () => {
-      const playerIdToUse = playerId || localStorage.getItem('oneSignalPlayerId');
+      const playerIdToUse = await getPlayerId();
       
       if (!playerIdToUse) {
-        console.log('[Notification Sync] No Player ID yet, skipping sync');
+        console.log('[Notification Sync] No Player ID yet, will retry in 5 seconds');
         return;
       }
+      
+      console.log('[Notification Sync] Using Player ID:', playerIdToUse);
 
       try {
         // Open IndexedDB
