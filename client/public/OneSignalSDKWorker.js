@@ -3,42 +3,33 @@ importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
 console.log('[Service Worker] OneSignal Service Worker initialized');
 
-// Get OneSignal Player ID from IndexedDB
-async function getPlayerIdFromIndexedDB() {
-  try {
-    // OneSignal stores the player ID in its own IndexedDB
-    const db = await new Promise((resolve, reject) => {
-      const request = indexedDB.open('OneSignal-db');
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    
-    const transaction = db.transaction(['Ids'], 'readonly');
-    const store = transaction.objectStore('Ids');
-    const request = store.get('userId');
-    
-    const result = await new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    
-    return result?.value || null;
-  } catch (error) {
-    console.error('[Service Worker] Error getting Player ID from IndexedDB:', error);
-    return null;
-  }
-}
-
 // Save notification directly to database via tRPC API
-async function saveNotificationToDatabase(title, body, data, playerId) {
+async function saveNotificationToDatabase(title, body, data) {
   try {
-    console.log('[Service Worker] Saving notification to database...');
-    console.log('[Service Worker] Player ID:', playerId);
+    console.log('[Service Worker] 💾 Saving notification to database...');
     console.log('[Service Worker] Title:', title);
     console.log('[Service Worker] Body:', body);
+    console.log('[Service Worker] Data:', data);
+    
+    // Extract Player ID from push data
+    // OneSignal includes player ID in the custom data
+    let playerId = null;
+    
+    if (data) {
+      // Try different possible locations for player ID
+      playerId = data.oneSignalPlayerId || 
+                 data.playerId || 
+                 data.player_id ||
+                 (data.custom && data.custom.i) ||
+                 (data.additionalData && data.additionalData.playerId);
+    }
+    
+    console.log('[Service Worker] Extracted Player ID from payload:', playerId);
     
     if (!playerId) {
-      console.warn('[Service Worker] No Player ID, cannot save to database');
+      console.warn('[Service Worker] ⚠️ No Player ID in push payload');
+      console.warn('[Service Worker] Full data object:', JSON.stringify(data));
+      // Don't save if no player ID - we can't associate it with a user
       return false;
     }
     
@@ -58,7 +49,7 @@ async function saveNotificationToDatabase(title, body, data, playerId) {
     };
     
     console.log('[Service Worker] API Request:', apiUrl);
-    console.log('[Service Worker] Request Body:', requestBody);
+    console.log('[Service Worker] Request Body:', JSON.stringify(requestBody));
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -69,7 +60,8 @@ async function saveNotificationToDatabase(title, body, data, playerId) {
     });
     
     if (response.ok) {
-      console.log('[Service Worker] ✅ Notification saved to database successfully');
+      const result = await response.json();
+      console.log('[Service Worker] ✅ Notification saved to database successfully:', result);
       return true;
     } else {
       const errorText = await response.text();
@@ -93,31 +85,32 @@ self.addEventListener('push', async function(event) {
   try {
     if (event.data) {
       const payload = event.data.json();
-      console.log('[Service Worker] Push payload:', payload);
+      console.log('[Service Worker] Full push payload:', JSON.stringify(payload, null, 2));
       
       title = payload.title || payload.heading || title;
       body = payload.body || payload.message || payload.alert || body;
-      data = payload.data || payload.additionalData || payload.custom || null;
+      data = payload.data || payload.additionalData || payload.custom || payload;
     }
   } catch (e) {
     console.error('[Service Worker] Error parsing push data:', e);
   }
   
-  // Get Player ID and save to database
+  // Save to database
   event.waitUntil(
     (async () => {
-      const playerId = await getPlayerIdFromIndexedDB();
-      await saveNotificationToDatabase(title, body, data, playerId);
+      const saved = await saveNotificationToDatabase(title, body, data);
       
-      // Notify all open tabs
-      const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-      clients.forEach(client => {
-        client.postMessage({
-          type: 'NOTIFICATION_SAVED',
-          title: title,
-          body: body,
+      if (saved) {
+        // Notify all open tabs that a new notification was saved
+        const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'NOTIFICATION_SAVED',
+            title: title,
+            body: body,
+          });
         });
-      });
+      }
     })()
   );
 });

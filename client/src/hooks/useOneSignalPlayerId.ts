@@ -9,6 +9,9 @@ declare global {
 /**
  * Hook to get and store OneSignal Player ID
  * Returns the player ID from OneSignal or localStorage
+ * 
+ * NOTE: OneSignal is already initialized in index.html,
+ * so we just need to get the Player ID, not initialize again!
  */
 export function useOneSignalPlayerId() {
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -20,20 +23,42 @@ export function useOneSignalPlayerId() {
         // First check localStorage
         const storedPlayerId = localStorage.getItem('oneSignalPlayerId');
         if (storedPlayerId) {
+          console.log('[useOneSignalPlayerId] Found in localStorage:', storedPlayerId);
           setPlayerId(storedPlayerId);
           setIsLoading(false);
         }
 
-        // Then try to get from OneSignal
+        // Wait for OneSignal to be ready (it's initialized in index.html)
         if (window.OneSignal) {
-          await window.OneSignal.init({
-            appId: '5a9ded2d-f692-4e8c-9b3b-4233fe2b1ecc',
-          });
-
-          const id = await window.OneSignal.getUserId();
-          if (id) {
-            setPlayerId(id);
-            localStorage.setItem('oneSignalPlayerId', id);
+          // Don't call init() again! OneSignal is already initialized
+          // Just wait for it to be ready and get the Player ID
+          
+          // Check if User object is available
+          if (window.OneSignal.User && window.OneSignal.User.PushSubscription) {
+            const id = window.OneSignal.User.PushSubscription.id;
+            if (id) {
+              console.log('[useOneSignalPlayerId] Got Player ID from OneSignal:', id);
+              setPlayerId(id);
+              localStorage.setItem('oneSignalPlayerId', id);
+            } else {
+              console.log('[useOneSignalPlayerId] No Player ID yet (user not subscribed)');
+            }
+          } else {
+            console.log('[useOneSignalPlayerId] OneSignal User object not ready yet');
+            
+            // Retry after a delay
+            setTimeout(async () => {
+              try {
+                if (window.OneSignal?.User?.PushSubscription?.id) {
+                  const id = window.OneSignal.User.PushSubscription.id;
+                  console.log('[useOneSignalPlayerId] Got Player ID on retry:', id);
+                  setPlayerId(id);
+                  localStorage.setItem('oneSignalPlayerId', id);
+                }
+              } catch (e) {
+                console.error('[useOneSignalPlayerId] Error on retry:', e);
+              }
+            }, 2000);
           }
         }
       } catch (error) {
