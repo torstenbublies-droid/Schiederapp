@@ -3,7 +3,7 @@ import { Settings as SettingsIcon, Bell, BellOff, Loader2, ChevronLeft } from "l
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
@@ -15,24 +15,17 @@ declare global {
 }
 
 export default function Settings() {
-  const { toast } = useToast();
+  // Using sonner toast
   const [pushEnabled, setPushEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [oneSignalPlayerId, setOneSignalPlayerId] = useState<string | null>(null);
 
   const updatePushSettingsMutation = trpc.userNotifications.updatePushSettings.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Einstellungen gespeichert",
-        description: "Deine Push-Benachrichtigungs-Einstellungen wurden aktualisiert.",
-      });
+      toast.success("Push-Benachrichtigungs-Einstellungen wurden aktualisiert.");
     },
     onError: () => {
-      toast({
-        title: "Fehler",
-        description: "Die Einstellungen konnten nicht gespeichert werden.",
-        variant: "destructive",
-      });
+      toast.error("Die Einstellungen konnten nicht gespeichert werden.");
     },
   });
 
@@ -66,11 +59,7 @@ export default function Settings() {
       if (checked) {
         // Enable push notifications
         if (!('Notification' in window)) {
-          toast({
-            title: "Nicht unterstützt",
-            description: "Dein Browser unterstützt keine Push-Benachrichtigungen.",
-            variant: "destructive",
-          });
+          toast.error("Dein Browser unterstützt keine Push-Benachrichtigungen.");
           setIsLoading(false);
           return;
         }
@@ -93,25 +82,14 @@ export default function Settings() {
               setPushEnabled(true);
               setOneSignalPlayerId(playerId);
               
-              toast({
-                title: "Aktiviert",
-                description: "Push-Benachrichtigungen wurden erfolgreich aktiviert! 🎉",
-              });
+              toast.success("Push-Benachrichtigungen wurden erfolgreich aktiviert! 🎉");
             } catch (error) {
               console.error('[Settings] OneSignal error:', error);
-              toast({
-                title: "Fehler",
-                description: "Die Registrierung bei OneSignal ist fehlgeschlagen.",
-                variant: "destructive",
-              });
+              toast.error("Die Registrierung bei OneSignal ist fehlgeschlagen.");
             }
           }
         } else if (permission === 'denied') {
-          toast({
-            title: "Blockiert",
-            description: "Benachrichtigungen sind blockiert. Bitte erlaube sie in den Browser-Einstellungen.",
-            variant: "destructive",
-          });
+          toast.error("Benachrichtigungen sind blockiert. Bitte erlaube sie in den Browser-Einstellungen.");
         }
       } else {
         // Disable push notifications
@@ -128,27 +106,16 @@ export default function Settings() {
             setPushEnabled(false);
             setOneSignalPlayerId(null);
             
-            toast({
-              title: "Deaktiviert",
-              description: "Push-Benachrichtigungen wurden deaktiviert.",
-            });
+            toast.success("Push-Benachrichtigungen wurden deaktiviert.");
           } catch (error) {
             console.error('[Settings] Error disabling push:', error);
-            toast({
-              title: "Fehler",
-              description: "Push-Benachrichtigungen konnten nicht deaktiviert werden.",
-              variant: "destructive",
-            });
+            toast.error("Push-Benachrichtigungen konnten nicht deaktiviert werden.");
           }
         }
       }
     } catch (error) {
       console.error('[Settings] Error:', error);
-      toast({
-        title: "Fehler",
-        description: "Ein Fehler ist aufgetreten. Bitte versuche es erneut.",
-        variant: "destructive",
-      });
+      toast.error("Ein Fehler ist aufgetreten. Bitte versuche es erneut.");
     } finally {
       setIsLoading(false);
     }

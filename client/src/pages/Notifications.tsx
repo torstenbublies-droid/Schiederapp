@@ -3,12 +3,12 @@ import { Bell, Trash2, CheckCheck, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 
 export default function Notifications() {
-  const { toast } = useToast();
+  // Using sonner toast
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { data: notifications, isLoading, refetch } = trpc.userNotifications.list.useQuery({ limit: 50 });
@@ -23,10 +23,7 @@ export default function Notifications() {
   const markAllAsReadMutation = trpc.userNotifications.markAllAsRead.useMutation({
     onSuccess: () => {
       refetch();
-      toast({
-        title: "Alle als gelesen markiert",
-        description: "Alle Benachrichtigungen wurden als gelesen markiert.",
-      });
+      toast.success("Alle Benachrichtigungen wurden als gelesen markiert.");
     },
   });
 
@@ -34,18 +31,11 @@ export default function Notifications() {
     onSuccess: () => {
       refetch();
       setDeletingId(null);
-      toast({
-        title: "Benachrichtigung gelöscht",
-        description: "Die Benachrichtigung wurde erfolgreich gelöscht.",
-      });
+      toast.success("Benachrichtigung wurde gelöscht.");
     },
     onError: () => {
       setDeletingId(null);
-      toast({
-        title: "Fehler",
-        description: "Die Benachrichtigung konnte nicht gelöscht werden.",
-        variant: "destructive",
-      });
+      toast.error("Die Benachrichtigung konnte nicht gelöscht werden.");
     },
   });
 
