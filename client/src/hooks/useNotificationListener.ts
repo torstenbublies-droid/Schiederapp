@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useOneSignalPlayerId } from './useOneSignalPlayerId';
+import { nanoid } from 'nanoid';
+
+declare global {
+  interface Window {
+    OneSignal?: any;
+  }
+}
 
 /**
  * Hook that listens for service worker messages to save notifications
@@ -8,9 +15,57 @@ import { useOneSignalPlayerId } from './useOneSignalPlayerId';
 export function useNotificationListener() {
   const utils = trpc.useUtils();
   const { playerId } = useOneSignalPlayerId();
+  const createNotificationMutation = trpc.userNotifications.create.useMutation();
 
   useEffect(() => {
-    // Listen for messages from service worker
+    // Listen for OneSignal notification events
+    const setupOneSignalListener = async () => {
+      if (!window.OneSignal) {
+        console.log('[Notification Listener] OneSignal not available yet');
+        return;
+      }
+
+      try {
+        await window.OneSignal.Notifications.addEventListener('foregroundWillDisplay', async (event: any) => {
+          console.log('[Notification Listener] Foreground notification received:', event);
+          
+          const notification = event.notification;
+          const playerIdToUse = playerId || localStorage.getItem('oneSignalPlayerId');
+          
+          if (!playerIdToUse) {
+            console.warn('[Notification Listener] No OneSignal Player ID available');
+            return;
+          }
+
+          try {
+            // Save notification to database
+            await createNotificationMutation.mutateAsync({
+              oneSignalPlayerId: playerIdToUse,
+              title: notification.title || 'Benachrichtigung',
+              message: notification.body || '',
+              type: 'info',
+              data: notification.additionalData ? JSON.stringify(notification.additionalData) : null,
+            });
+
+            console.log('[Notification Listener] Notification saved successfully');
+            
+            // Invalidate queries to refresh notification list
+            utils.userNotifications.list.invalidate();
+            utils.userNotifications.unreadCount.invalidate();
+          } catch (error) {
+            console.error('[Notification Listener] Error saving notification:', error);
+          }
+        });
+
+        console.log('[Notification Listener] OneSignal listener registered');
+      } catch (error) {
+        console.error('[Notification Listener] Error setting up OneSignal listener:', error);
+      }
+    };
+
+    setupOneSignalListener();
+
+    // Fallback: Listen for messages from service worker (legacy)
     const handleMessage = async (event: MessageEvent) => {
       if (event.data && event.data.type === 'SAVE_NOTIFICATION') {
         const { notification } = event.data;
