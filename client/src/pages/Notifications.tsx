@@ -6,13 +6,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
+import { useOneSignalPlayerId } from "@/hooks/useOneSignalPlayerId";
 
 export default function Notifications() {
   // Using sonner toast
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { playerId, isLoading: playerIdLoading } = useOneSignalPlayerId();
 
-  const { data: notifications, isLoading, refetch } = trpc.userNotifications.list.useQuery({ limit: 50 });
-  const { data: unreadCount } = trpc.userNotifications.unreadCount.useQuery();
+  const { data: notifications, isLoading, refetch } = trpc.userNotifications.list.useQuery(
+    { oneSignalPlayerId: playerId!, limit: 50 },
+    { enabled: !!playerId }
+  );
+  const { data: unreadCount } = trpc.userNotifications.unreadCount.useQuery(
+    { oneSignalPlayerId: playerId! },
+    { enabled: !!playerId }
+  );
   
   const markAsReadMutation = trpc.userNotifications.markAsRead.useMutation({
     onSuccess: () => {
@@ -44,12 +52,14 @@ export default function Notifications() {
   };
 
   const handleMarkAllAsRead = () => {
-    markAllAsReadMutation.mutate();
+    if (!playerId) return;
+    markAllAsReadMutation.mutate({ oneSignalPlayerId: playerId });
   };
 
   const handleDelete = (id: string) => {
+    if (!playerId) return;
     setDeletingId(id);
-    deleteMutation.mutate({ id });
+    deleteMutation.mutate({ id, oneSignalPlayerId: playerId });
   };
 
   const getNotificationIcon = (type: string) => {
@@ -65,7 +75,7 @@ export default function Notifications() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || playerIdLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />

@@ -300,7 +300,7 @@ export type InsertPushNotification = typeof pushNotifications.$inferInsert;
  */
 export const userNotifications = pgTable("userNotifications", {
   id: varchar("id", { length: 64 }).primaryKey(),
-  userId: varchar("userId", { length: 64 }).notNull(),
+  oneSignalPlayerId: varchar("oneSignalPlayerId", { length:  64 }).notNull(),
   title: varchar("title", { length: 500 }).notNull(),
   message: text("message").notNull(),
   type: notificationTypeEnum("type").default("info").notNull(),

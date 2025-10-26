@@ -4,6 +4,14 @@ importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 // Helper function to save notification to database
 async function saveNotificationToDatabase(title, body, data) {
   try {
+    // Get OneSignal Player ID from IndexedDB or data
+    let oneSignalPlayerId = null;
+    
+    // Try to get from notification data
+    if (data && data.oneSignalPlayerId) {
+      oneSignalPlayerId = data.oneSignalPlayerId;
+    }
+    
     // Get all clients (open tabs/windows)
     const allClients = await clients.matchAll({ includeUncontrolled: true, type: 'window' });
     
@@ -14,7 +22,8 @@ async function saveNotificationToDatabase(title, body, data) {
         notification: {
           title: title,
           message: body,
-          data: data
+          data: data,
+          oneSignalPlayerId: oneSignalPlayerId
         }
       });
       console.log('[Service Worker] Sent notification to client for saving');

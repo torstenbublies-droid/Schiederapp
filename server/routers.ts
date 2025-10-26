@@ -496,41 +496,58 @@ export const appRouter = router({
   }),
 
   userNotifications: router({
-    list: protectedProcedure
-      .input(z.object({ limit: z.number().default(50) }))
-      .query(async ({ input, ctx }) => {
-        return db.getUserNotifications(ctx.user.id, input.limit);
+    list: publicProcedure
+      .input(z.object({ 
+        oneSignalPlayerId: z.string(),
+        limit: z.number().default(50) 
+      }))
+      .query(async ({ input }) => {
+        return db.getUserNotificationsByPlayerId(input.oneSignalPlayerId, input.limit);
       }),
 
-    unreadCount: protectedProcedure
-      .query(async ({ ctx }) => {
-        return db.getUnreadNotificationCount(ctx.user.id);
+    unreadCount: publicProcedure
+      .input(z.object({ oneSignalPlayerId: z.string() }))
+      .query(async ({ input }) => {
+        return db.getUnreadNotificationCountByPlayerId(input.oneSignalPlayerId);
       }),
 
-    markAsRead: protectedProcedure
+    create: publicProcedure
+      .input(z.object({
+        oneSignalPlayerId: z.string(),
+        title: z.string(),
+        message: z.string(),
+        type: z.string().default('info'),
+        data: z.string().nullable().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.createUserNotificationByPlayerId(
+          input.oneSignalPlayerId,
+          input.title,
+          input.message,
+          input.type,
+          input.data || null
+        );
+      }),
+
+    markAsRead: publicProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return db.markNotificationAsRead(input.id);
       }),
 
-    markAllAsRead: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        return db.markAllNotificationsAsRead(ctx.user.id);
+    markAllAsRead: publicProcedure
+      .input(z.object({ oneSignalPlayerId: z.string() }))
+      .mutation(async ({ input }) => {
+        return db.markAllNotificationsAsReadByPlayerId(input.oneSignalPlayerId);
       }),
 
-    delete: protectedProcedure
-      .input(z.object({ id: z.string() }))
-      .mutation(async ({ input, ctx }) => {
-        return db.deleteUserNotification(input.id, ctx.user.id);
-      }),
-
-    updatePushSettings: protectedProcedure
-      .input(z.object({
-        oneSignalPlayerId: z.string().nullable(),
-        pushEnabled: z.boolean(),
+    delete: publicProcedure
+      .input(z.object({ 
+        id: z.string(),
+        oneSignalPlayerId: z.string()
       }))
-      .mutation(async ({ input, ctx }) => {
-        return db.updateUserPushSettings(ctx.user.id, input.oneSignalPlayerId, input.pushEnabled);
+      .mutation(async ({ input }) => {
+        return db.deleteUserNotificationByPlayerId(input.id, input.oneSignalPlayerId);
       }),
   }),
 });

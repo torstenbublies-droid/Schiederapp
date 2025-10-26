@@ -604,6 +604,88 @@ export async function deleteUserNotification(id: string, userId: string) {
   return true;
 }
 
+// User Notifications functions by OneSignal Player ID (no auth required)
+export async function getUserNotificationsByPlayerId(oneSignalPlayerId: string, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db
+    .select()
+    .from(userNotifications)
+    .where(eq(userNotifications.oneSignalPlayerId, oneSignalPlayerId))
+    .orderBy(desc(userNotifications.receivedAt))
+    .limit(limit);
+}
+
+export async function getUnreadNotificationCountByPlayerId(oneSignalPlayerId: string) {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(userNotifications)
+    .where(and(
+      eq(userNotifications.oneSignalPlayerId, oneSignalPlayerId),
+      eq(userNotifications.isRead, false)
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+export async function createUserNotificationByPlayerId(
+  oneSignalPlayerId: string,
+  title: string,
+  message: string,
+  type: string = 'info',
+  data: string | null = null
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const notification = {
+    id: nanoid(),
+    oneSignalPlayerId,
+    title,
+    message,
+    type,
+    data,
+    isRead: false,
+    receivedAt: new Date(),
+  };
+  
+  await db.insert(userNotifications).values(notification);
+  return notification;
+}
+
+export async function markAllNotificationsAsReadByPlayerId(oneSignalPlayerId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(userNotifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(and(
+      eq(userNotifications.oneSignalPlayerId, oneSignalPlayerId),
+      eq(userNotifications.isRead, false)
+    ));
+  
+  return true;
+}
+
+export async function deleteUserNotificationByPlayerId(id: string, oneSignalPlayerId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .delete(userNotifications)
+    .where(and(
+      eq(userNotifications.id, id),
+      eq(userNotifications.oneSignalPlayerId, oneSignalPlayerId)
+    ));
+  
+  return true;
+}
+
 export async function updateUserPushSettings(userId: string, oneSignalPlayerId: string | null, pushEnabled: boolean) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

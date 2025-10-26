@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
-import { nanoid } from 'nanoid';
+import { useOneSignalPlayerId } from './useOneSignalPlayerId';
 
 /**
  * Hook that listens for service worker messages to save notifications
  */
 export function useNotificationListener() {
   const utils = trpc.useUtils();
+  const { playerId } = useOneSignalPlayerId();
 
   useEffect(() => {
     // Listen for messages from service worker
@@ -16,6 +17,15 @@ export function useNotificationListener() {
         
         console.log('[Notification Listener] Received notification to save:', notification);
         
+        // Get OneSignal Player ID from localStorage or event data
+        const storedPlayerId = localStorage.getItem('oneSignalPlayerId');
+        const playerIdToUse = notification.oneSignalPlayerId || storedPlayerId;
+        
+        if (!playerIdToUse) {
+          console.warn('[Notification Listener] No OneSignal Player ID available');
+          return;
+        }
+
         try {
           // Save notification to database via tRPC
           const response = await fetch('/api/trpc/userNotifications.create', {
@@ -24,7 +34,7 @@ export function useNotificationListener() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              id: nanoid(),
+              oneSignalPlayerId: playerIdToUse,
               title: notification.title,
               message: notification.message,
               type: 'info',

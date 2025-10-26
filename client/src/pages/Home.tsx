@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
 import WeatherWidget from "@/components/WeatherWidget";
 import PushNotificationButton from "@/components/PushNotificationButton";
+import { useOneSignalPlayerId } from "@/hooks/useOneSignalPlayerId";
 
 interface TileProps {
   title: string;
@@ -60,7 +61,11 @@ export default function Home() {
   const [showChat, setShowChat] = useState(false);
   const { data: mayor } = trpc.mayor.info.useQuery();
   const { data: notifications } = trpc.pushNotifications.active.useQuery();
-  const { data: unreadCount } = trpc.userNotifications.unreadCount.useQuery();
+  const { playerId } = useOneSignalPlayerId();
+  const { data: unreadCount } = trpc.userNotifications.unreadCount.useQuery(
+    { oneSignalPlayerId: playerId! },
+    { enabled: !!playerId }
+  );
 
   const tiles: TileProps[] = [
     { title: "Aktuelles", icon: <Newspaper size={28} />, href: "/news", color: "bg-primary" },
