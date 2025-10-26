@@ -17,6 +17,8 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: roleEnum("role").default("user").notNull(),
+  oneSignalPlayerId: varchar("oneSignalPlayerId", { length: 64 }),
+  pushEnabled: boolean("pushEnabled").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow(),
 });
@@ -292,4 +294,22 @@ export const pushNotifications = pgTable("pushNotifications", {
 
 export type PushNotification = typeof pushNotifications.$inferSelect;
 export type InsertPushNotification = typeof pushNotifications.$inferInsert;
+
+/**
+ * User Notifications - stores notifications received by each user
+ */
+export const userNotifications = pgTable("userNotifications", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: varchar("userId", { length: 64 }).notNull(),
+  title: varchar("title", { length: 500 }).notNull(),
+  message: text("message").notNull(),
+  type: notificationTypeEnum("type").default("info").notNull(),
+  isRead: boolean("isRead").default(false).notNull(),
+  receivedAt: timestamp("receivedAt").defaultNow().notNull(),
+  readAt: timestamp("readAt"),
+  data: text("data"), // JSON string for additional data
+});
+
+export type UserNotification = typeof userNotifications.$inferSelect;
+export type InsertUserNotification = typeof userNotifications.$inferInsert;
 

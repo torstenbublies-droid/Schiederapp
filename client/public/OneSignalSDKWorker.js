@@ -1,6 +1,31 @@
 // OneSignal Service Worker for Push Notifications
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
+// Helper function to save notification to database
+async function saveNotificationToDatabase(title, body, data) {
+  try {
+    // Get all clients (open tabs/windows)
+    const allClients = await clients.matchAll({ includeUncontrolled: true, type: 'window' });
+    
+    if (allClients.length > 0) {
+      // Send message to the first client to save notification
+      allClients[0].postMessage({
+        type: 'SAVE_NOTIFICATION',
+        notification: {
+          title: title,
+          message: body,
+          data: data
+        }
+      });
+      console.log('[Service Worker] Sent notification to client for saving');
+    } else {
+      console.log('[Service Worker] No clients available to save notification');
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error saving notification:', error);
+  }
+}
+
 // Add push event handler
 self.addEventListener('push', function(event) {
   console.log('[Service Worker] Push event received');
@@ -12,6 +37,8 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200]
   };
   
+  let notificationData = null;
+  
   try {
     if (event.data) {
       const data = event.data.json();
@@ -22,7 +49,10 @@ self.addEventListener('push', function(event) {
       if (data.body) options.body = data.body;
       if (data.message) options.body = data.message;
       if (data.icon) options.icon = data.icon;
-      if (data.url) options.data = { url: data.url };
+      if (data.url) {
+        options.data = { url: data.url };
+        notificationData = data;
+      }
     }
   } catch (e) {
     console.log('[Service Worker] Using text data');
@@ -38,9 +68,12 @@ self.addEventListener('push', function(event) {
   console.log('[Service Worker] Showing notification with:', { title, options });
   
   event.waitUntil(
-    self.registration.showNotification(title, options)
-      .then(() => console.log('[Service Worker] Notification shown successfully'))
-      .catch(err => console.error('[Service Worker] Error showing notification:', err))
+    Promise.all([
+      self.registration.showNotification(title, options)
+        .then(() => console.log('[Service Worker] Notification shown successfully'))
+        .catch(err => console.error('[Service Worker] Error showing notification:', err)),
+      saveNotificationToDatabase(title, options.body, notificationData)
+    ])
   );
 });
 

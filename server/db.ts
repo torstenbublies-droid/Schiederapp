@@ -16,7 +16,8 @@ import {
   chatLogs, InsertChatLog,
   userPreferences, InsertUserPreference,
   contactMessages, InsertContactMessage,
-  pushNotifications, InsertPushNotification
+  pushNotifications, InsertPushNotification,
+  userNotifications, InsertUserNotification
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -521,6 +522,97 @@ export async function deletePushNotification(id: string) {
   if (!db) throw new Error("Database not available");
   
   await db.delete(pushNotifications).where(eq(pushNotifications.id, id));
+  return true;
+}
+
+
+
+// User Notifications functions
+export async function getUserNotifications(userId: string, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db
+    .select()
+    .from(userNotifications)
+    .where(eq(userNotifications.userId, userId))
+    .orderBy(desc(userNotifications.receivedAt))
+    .limit(limit);
+}
+
+export async function getUnreadNotificationCount(userId: string) {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(userNotifications)
+    .where(and(
+      eq(userNotifications.userId, userId),
+      eq(userNotifications.isRead, false)
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+export async function createUserNotification(data: InsertUserNotification) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(userNotifications).values(data);
+  return data;
+}
+
+export async function markNotificationAsRead(id: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(userNotifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(eq(userNotifications.id, id));
+  
+  return true;
+}
+
+export async function markAllNotificationsAsRead(userId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(userNotifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(and(
+      eq(userNotifications.userId, userId),
+      eq(userNotifications.isRead, false)
+    ));
+  
+  return true;
+}
+
+export async function deleteUserNotification(id: string, userId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .delete(userNotifications)
+    .where(and(
+      eq(userNotifications.id, id),
+      eq(userNotifications.userId, userId)
+    ));
+  
+  return true;
+}
+
+export async function updateUserPushSettings(userId: string, oneSignalPlayerId: string | null, pushEnabled: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(users)
+    .set({ oneSignalPlayerId, pushEnabled })
+    .where(eq(users.id, userId));
+  
   return true;
 }
 

@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import { 
   Newspaper, Calendar, Building2, FileText, Wrench, 
   Trash2, AlertTriangle, Palmtree, GraduationCap, 
-  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus 
+  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus, Settings 
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
@@ -23,10 +23,33 @@ function Tile({ title, icon, href, color = "bg-primary" }: TileProps) {
   return (
     <Link href={href}>
       <Card className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer tile-shadow h-full flex flex-col items-center justify-center text-center gap-3">
-        <div className={`${color} text-white p-4 rounded-2xl`}>
+        <div className={`${color} text-white p-4 rounded-2xl relative`}>
           {icon}
         </div>
         <h3 className="font-semibold text-base">{title}</h3>
+      </Card>
+    </Link>
+  );
+}
+
+function NotificationTile({ unreadCount }: { unreadCount: number }) {
+  return (
+    <Link href="/notifications">
+      <Card className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer tile-shadow h-full flex flex-col items-center justify-center text-center gap-3">
+        <div className="bg-blue-600 text-white p-4 rounded-2xl relative">
+          <Bell size={28} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </div>
+        <h3 className="font-semibold text-base">Benachrichtigungen</h3>
+        {unreadCount > 0 && (
+          <p className="text-xs text-blue-600 font-medium">
+            {unreadCount} {unreadCount === 1 ? 'neue' : 'neue'}
+          </p>
+        )}
       </Card>
     </Link>
   );
@@ -37,6 +60,7 @@ export default function Home() {
   const [showChat, setShowChat] = useState(false);
   const { data: mayor } = trpc.mayor.info.useQuery();
   const { data: notifications } = trpc.pushNotifications.active.useQuery();
+  const { data: unreadCount } = trpc.userNotifications.unreadCount.useQuery();
 
   const tiles: TileProps[] = [
     { title: "Aktuelles", icon: <Newspaper size={28} />, href: "/news", color: "bg-primary" },
@@ -51,6 +75,7 @@ export default function Home() {
     { title: "Vereine", icon: <UserPlus size={28} />, href: "/clubs", color: "bg-amber-600" },
     { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "/council", color: "bg-indigo-600" },
     { title: "Kontakt & Anliegen", icon: <Phone size={28} />, href: "/contact", color: "bg-primary" },
+    { title: "Einstellungen", icon: <Settings size={28} />, href: "/settings", color: "bg-gray-600" },
   ];
 
   return (
@@ -114,6 +139,9 @@ export default function Home() {
 
         {/* Tiles Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          {/* Notification Tile - Always first */}
+          <NotificationTile unreadCount={unreadCount || 0} />
+          
           {tiles.map((tile, index) => (
             <Tile key={index} {...tile} />
           ))}

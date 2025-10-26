@@ -494,6 +494,45 @@ export const appRouter = router({
         return db.deletePushNotification(input.id);
       }),
   }),
+
+  userNotifications: router({
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().default(50) }))
+      .query(async ({ input, ctx }) => {
+        return db.getUserNotifications(ctx.user.id, input.limit);
+      }),
+
+    unreadCount: protectedProcedure
+      .query(async ({ ctx }) => {
+        return db.getUnreadNotificationCount(ctx.user.id);
+      }),
+
+    markAsRead: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return db.markNotificationAsRead(input.id);
+      }),
+
+    markAllAsRead: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        return db.markAllNotificationsAsRead(ctx.user.id);
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        return db.deleteUserNotification(input.id, ctx.user.id);
+      }),
+
+    updatePushSettings: protectedProcedure
+      .input(z.object({
+        oneSignalPlayerId: z.string().nullable(),
+        pushEnabled: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return db.updateUserPushSettings(ctx.user.id, input.oneSignalPlayerId, input.pushEnabled);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
