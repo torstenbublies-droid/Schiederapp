@@ -23,14 +23,7 @@ export default function PushNotificationButton() {
     setIsSubscribed(permission === 'granted');
   };
 
-  const handleToggle = async () => {
-    if (isSubscribed) {
-      // Show info how to disable
-      alert('Um Benachrichtigungen zu deaktivieren, klicke auf das Schloss-Symbol in der Adressleiste und ändere die Benachrichtigungs-Einstellung.');
-      return;
-    }
-
-    // Enable push
+  const handleEnable = async () => {
     setIsLoading(true);
     
     try {
@@ -70,24 +63,58 @@ export default function PushNotificationButton() {
     }
   };
 
+  const handleDisable = async () => {
+    setIsLoading(true);
+    
+    try {
+      if (window.OneSignal) {
+        // Opt out from OneSignal
+        await window.OneSignal.User.PushSubscription.optOut();
+        setIsSubscribed(false);
+        alert('Benachrichtigungen deaktiviert. Du erhältst keine Push-Benachrichtigungen mehr.');
+      }
+    } catch (error) {
+      console.error('[Push] Error disabling:', error);
+      alert('Fehler beim Deaktivieren. Bitte versuche es erneut.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isSubscribed) {
+    return (
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={handleDisable}
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        {isLoading ? (
+          <>⏳ Lädt...</>
+        ) : (
+          <>
+            <BellOff className="h-4 w-4" />
+            Deaktivieren
+          </>
+        )}
+      </Button>
+    );
+  }
+
   return (
     <Button
-      variant={isSubscribed ? "secondary" : "default"}
+      variant="secondary"
       size="sm"
-      onClick={handleToggle}
+      onClick={handleEnable}
       disabled={isLoading}
       className="flex items-center gap-2"
     >
       {isLoading ? (
         <>⏳ Lädt...</>
-      ) : isSubscribed ? (
-        <>
-          <Bell className="h-4 w-4" />
-          Aktiviert
-        </>
       ) : (
         <>
-          <BellOff className="h-4 w-4" />
+          <Bell className="h-4 w-4" />
           Aktivieren
         </>
       )}
