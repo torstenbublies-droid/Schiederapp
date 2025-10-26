@@ -1,68 +1,90 @@
-// OneSignal Service Worker with Notification Storage
+// OneSignal Service Worker with Direct Database Storage
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-// IndexedDB for storing notifications
-const DB_NAME = 'NotificationStorage';
-const DB_VERSION = 1;
-const STORE_NAME = 'pendingNotifications';
+console.log('[Service Worker] OneSignal Service Worker initialized');
 
-// Open IndexedDB
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+// Get OneSignal Player ID from IndexedDB
+async function getPlayerIdFromIndexedDB() {
+  try {
+    // OneSignal stores the player ID in its own IndexedDB
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('OneSignal-db');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
     
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
+    const transaction = db.transaction(['Ids'], 'readonly');
+    const store = transaction.objectStore('Ids');
+    const request = store.get('userId');
     
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-  });
+    const result = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    
+    return result?.value || null;
+  } catch (error) {
+    console.error('[Service Worker] Error getting Player ID from IndexedDB:', error);
+    return null;
+  }
 }
 
-// Store notification in IndexedDB
-async function storeNotification(title, body, data) {
+// Save notification directly to database via tRPC API
+async function saveNotificationToDatabase(title, body, data, playerId) {
   try {
-    const db = await openDB();
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
+    console.log('[Service Worker] Saving notification to database...');
+    console.log('[Service Worker] Player ID:', playerId);
+    console.log('[Service Worker] Title:', title);
+    console.log('[Service Worker] Body:', body);
     
-    const notification = {
+    if (!playerId) {
+      console.warn('[Service Worker] No Player ID, cannot save to database');
+      return false;
+    }
+    
+    // Generate unique ID
+    const notificationId = 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Prepare tRPC request
+    const apiUrl = self.location.origin + '/api/trpc/userNotifications.create';
+    
+    const requestBody = {
+      oneSignalPlayerId: playerId,
+      id: notificationId,
       title: title,
-      body: body,
-      data: data,
-      timestamp: Date.now()
+      message: body,
+      type: (data && data.type) || 'info',
+      data: data || null,
     };
     
-    store.add(notification);
+    console.log('[Service Worker] API Request:', apiUrl);
+    console.log('[Service Worker] Request Body:', requestBody);
     
-    await new Promise((resolve, reject) => {
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error);
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     });
     
-    console.log('[Service Worker] Notification stored in IndexedDB:', notification);
-    
-    // Notify all clients
-    const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'NEW_NOTIFICATION',
-        notification: notification
-      });
-    });
-    
+    if (response.ok) {
+      console.log('[Service Worker] ✅ Notification saved to database successfully');
+      return true;
+    } else {
+      const errorText = await response.text();
+      console.error('[Service Worker] ❌ Failed to save notification:', response.status, errorText);
+      return false;
+    }
   } catch (error) {
-    console.error('[Service Worker] Error storing notification:', error);
+    console.error('[Service Worker] ❌ Error saving notification to database:', error);
+    return false;
   }
 }
 
 // Listen for push events
 self.addEventListener('push', async function(event) {
-  console.log('[Service Worker] Push event received');
+  console.log('[Service Worker] 📨 Push event received');
   
   let title = 'Schieder-Schwalenberg';
   let body = 'Neue Nachricht';
@@ -75,14 +97,29 @@ self.addEventListener('push', async function(event) {
       
       title = payload.title || payload.heading || title;
       body = payload.body || payload.message || payload.alert || body;
-      data = payload.data || payload.additionalData || null;
+      data = payload.data || payload.additionalData || payload.custom || null;
     }
   } catch (e) {
     console.error('[Service Worker] Error parsing push data:', e);
   }
   
-  // Store notification
-  event.waitUntil(storeNotification(title, body, data));
+  // Get Player ID and save to database
+  event.waitUntil(
+    (async () => {
+      const playerId = await getPlayerIdFromIndexedDB();
+      await saveNotificationToDatabase(title, body, data, playerId);
+      
+      // Notify all open tabs
+      const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'NOTIFICATION_SAVED',
+          title: title,
+          body: body,
+        });
+      });
+    })()
+  );
 });
 
 // Listen for notification clicks
@@ -92,12 +129,10 @@ self.addEventListener('notificationclick', function(event) {
   
   const urlToOpen = (event.notification.data && event.notification.data.url) 
     ? event.notification.data.url 
-    : 'https://schiederapp.onrender.com/notifications';
+    : self.location.origin + '/notifications';
   
   event.waitUntil(
     clients.openWindow(urlToOpen)
   );
 });
-
-console.log('[Service Worker] OneSignal Service Worker with notification storage initialized');
 
