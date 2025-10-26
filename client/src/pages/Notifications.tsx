@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { useOneSignalPlayerId } from "@/hooks/useOneSignalPlayerId";
+import PushNotificationButton from "@/components/PushNotificationButton";
 
 export default function Notifications() {
   // Using sonner toast
@@ -98,17 +99,20 @@ export default function Notifications() {
                 </p>
               </div>
             </div>
-            {unreadCount && unreadCount > 0 && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-                disabled={markAllAsReadMutation.isPending}
-              >
-                <CheckCheck className="h-4 w-4 mr-2" />
-                Alle als gelesen
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <PushNotificationButton />
+              {unreadCount && unreadCount > 0 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                  disabled={markAllAsReadMutation.isPending}
+                >
+                  <CheckCheck className="h-4 w-4 mr-2" />
+                  Alle als gelesen
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import { 
   Newspaper, Calendar, Building2, FileText, Wrench, 
   Trash2, AlertTriangle, Palmtree, GraduationCap, 
-  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus, Settings 
+  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus 
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
@@ -80,7 +80,7 @@ export default function Home() {
     { title: "Vereine", icon: <UserPlus size={28} />, href: "/clubs", color: "bg-amber-600" },
     { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "/council", color: "bg-indigo-600" },
     { title: "Kontakt & Anliegen", icon: <Phone size={28} />, href: "/contact", color: "bg-primary" },
-    { title: "Einstellungen", icon: <Settings size={28} />, href: "/settings", color: "bg-gray-600" },
+
   ];
 
   return (
