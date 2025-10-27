@@ -1,6 +1,7 @@
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { nanoid } from "nanoid";
 import { 
   InsertUser, users, 
   news, InsertNews,
