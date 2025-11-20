@@ -120,36 +120,55 @@ export async function performWebSearch(query: string): Promise<string> {
 export function requiresWebSearch(message: string): boolean {
   const lowerMessage = message.toLowerCase();
   
-  // Keywords that indicate general/global questions that need web search
+  // Keywords that indicate questions that need web search
   const globalKeywords = [
+    // Politik & Regierung
     'bundeskanzler', 'kanzler', 'regierung', 'minister', 'ministerin',
     'bundesregierung', 'ministerpräsident', 'bauminister', 'bauministerin',
+    'präsident', 'präsidentin', 'politiker', 'politikerin',
+    
+    // Geografie & Allgemein
     'deutschland', 'europa', 'welt',
+    'hauptstadt von', 'einwohner von', 'wo liegt',
+    
+    // Zeit & Nachrichten
     'aktuell', 'heute', 'gestern', 'morgen',
     'nachrichten', 'news',
+    
+    // Wetter
     'wetter in', 'temperatur in',
-    'politik', 'politiker', 'politikerin',
+    
+    // Wirtschaft & Sport
     'wirtschaft', 'börse', 'aktien',
     'sport', 'fußball', 'bundesliga',
+    
+    // Wissenschaft
     'wissenschaft', 'forschung',
+    
+    // Events & Veranstaltungen (WICHTIG!)
+    'weihnachtsmarkt', 'adventsmarkt', 'christkindlmarkt',
+    'konzert', 'festival', 'fest', 'feier',
+    'markt', 'flohmarkt', 'wochenmarkt',
+    'was ist los', 'was kann man', 'was gibt es',
+    'nächste veranstaltung', 'kommende veranstaltung',
+    'veranstaltungen in', 'events in',
+    'schiedersee', 'am see',
+    
+    // Fragen
     'wer ist', 'wer war', 'was ist', 'was war', 'wie heißt',
-    'wie hoch', 'wie groß', 'wie alt',
-    'wann wurde', 'wo liegt',
-    'hauptstadt von', 'einwohner von',
-    'geschichte von', 'erfinder von',
-    'präsident', 'präsidentin'
+    'wie hoch', 'wie groß', 'wie alt', 'wann ist', 'wann findet',
+    'wann wurde', 'geschichte von', 'erfinder von'
   ];
   
   // Keywords that indicate LOCAL questions - NO web search needed
+  // (Nur für Fragen die definitiv OHNE Web-Suche beantwortet werden können)
   const localOnlyKeywords = [
     'rathaus', 'bürgermeister marco',
     'öffnungszeiten rathaus',
-    'veranstaltung', 'veranstaltungen',
-    'termin', 'termine',
     'mängelmelder', 'schadensmeldung',
     'abfall', 'müll', 'müllabfuhr',
-    'schieder-schwalenberg',
-    'lothe', 'ruensiek', 'wöbbel', 'glashütte'
+    // Ortsteile OHNE Events/Veranstaltungen
+    // (entfernt, damit Event-Fragen Web-Suche auslösen)
   ];
   
   // Check if message contains LOCAL-ONLY keywords
