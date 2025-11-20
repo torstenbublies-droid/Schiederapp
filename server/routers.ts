@@ -8,6 +8,7 @@ import { performWebSearch, requiresWebSearch } from "./web-search";
 import { performImprovedWebSearch } from "./web-search-improved";
 import { performPerplexitySearch } from "./perplexity-search";
 import { getCurrentWeather, getWeatherForecast } from "./open-meteo-weather";
+import { isProximityQuery, searchNearbyPlaces, formatPlacesForPrompt } from "./google-places";
 import { nanoid } from "nanoid";
 import * as db from "./db";
 import { stadtInfoRouter } from "./routers/stadtInfo";
@@ -252,6 +253,19 @@ export const appRouter = router({
           let systemPrompt: string;
           let webSearchResults = '';
           
+          // Prüfe, ob es eine Umkreissuche ist (Google Places)
+          const isProximity = isProximityQuery(input.message);
+          let placesResults = '';
+          
+          if (isProximity) {
+            console.log('[Chat] Proximity search triggered for:', input.message);
+            const placesData = await searchNearbyPlaces(input.message);
+            if (placesData) {
+              placesResults = formatPlacesForPrompt(placesData);
+              console.log('[Chat] Places results:', placesResults.substring(0, 200));
+            }
+          }
+          
           // Prüfe, ob Web-Suche benötigt wird
           const needsWebSearch = requiresWebSearch(input.message);
           
@@ -282,10 +296,18 @@ export const appRouter = router({
             const localContext = await searchLocalContext(input.message);
             const formattedContext = formatContextForPrompt(localContext);
             
-            // Füge Web-Suche-Ergebnisse hinzu wenn vorhanden
-            const contextWithWebSearch = webSearchResults 
-              ? formattedContext + '\n\n**AKTUELLE INFORMATIONEN AUS DEM INTERNET:**\n' + webSearchResults
-              : formattedContext;
+            // Füge Places-Ergebnisse und Web-Suche-Ergebnisse hinzu wenn vorhanden
+            let contextWithExtras = formattedContext;
+            
+            if (placesResults) {
+              contextWithExtras += '\n\n' + placesResults;
+            }
+            
+            if (webSearchResults) {
+              contextWithExtras += '\n\n**AKTUELLE INFORMATIONEN AUS DEM INTERNET:**\n' + webSearchResults;
+            }
+            
+            const contextWithWebSearch = contextWithExtras;
             
             systemPrompt = createLocalSystemPrompt(contextWithWebSearch);
           } else {
