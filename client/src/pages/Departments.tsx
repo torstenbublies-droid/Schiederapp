@@ -29,7 +29,7 @@ const departmentsData: Department[] = [
         position: "Bürgermeister",
         phone: "05282 / 601-11",
         fax: "05282 / 601-911",
-        email: "joerg.bierwirth@schieder-schwalenberg.de",
+        email: "marco.muellers@schieder-schwalenberg.de",
         room: "Raum 4",
         address: "Domäne 3, 32816 Schieder-Schwalenberg"
       }
