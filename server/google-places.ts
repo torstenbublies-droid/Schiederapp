@@ -176,20 +176,31 @@ export async function searchNearbyPlaces(query: string, radius: number = DEFAULT
       };
     }
     
-    // Formatiere Ergebnisse
-    const results = data.results.slice(0, 10).map((place: any) => ({
-      name: place.name,
-      address: place.vicinity,
-      rating: place.rating || null,
-      userRatingsTotal: place.user_ratings_total || 0,
-      openNow: place.opening_hours?.open_now || null,
-      types: place.types,
-      location: {
-        lat: place.geometry.location.lat,
-        lng: place.geometry.location.lng,
-      },
-      placeId: place.place_id,
-    }));
+    // Formatiere Ergebnisse und hole Details für jeden Ort
+    const placesWithBasicInfo = data.results.slice(0, 10);
+    
+    // Hole Details für jeden Ort (parallel)
+    const results = await Promise.all(
+      placesWithBasicInfo.map(async (place: any) => {
+        const details = await getPlaceDetails(place.place_id);
+        
+        return {
+          name: place.name,
+          address: place.vicinity,
+          rating: place.rating || null,
+          userRatingsTotal: place.user_ratings_total || 0,
+          openNow: place.opening_hours?.open_now || null,
+          phone: details?.formatted_phone_number || null,
+          website: details?.website || null,
+          types: place.types,
+          location: {
+            lat: place.geometry.location.lat,
+            lng: place.geometry.location.lng,
+          },
+          placeId: place.place_id,
+        };
+      })
+    );
     
     console.log(`[Google Places] ${results.length} Ergebnisse gefunden`);
     
@@ -264,6 +275,14 @@ export function formatPlacesForPrompt(placesData: any): string {
     
     if (place.openNow !== null) {
       formatted += `   🕐 ${place.openNow ? 'Jetzt geöffnet' : 'Jetzt geschlossen'}\n`;
+    }
+    
+    if (place.phone) {
+      formatted += `   📞 Telefon: ${place.phone}\n`;
+    }
+    
+    if (place.website) {
+      formatted += `   🌐 Website: ${place.website}\n`;
     }
     
     formatted += '\n';
