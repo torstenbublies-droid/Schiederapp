@@ -5,6 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { performWebSearch, requiresWebSearch } from "./web-search";
+import { performImprovedWebSearch } from "./web-search-improved";
 import { nanoid } from "nanoid";
 import * as db from "./db";
 import { stadtInfoRouter } from "./routers/stadtInfo";
@@ -255,7 +256,15 @@ export const appRouter = router({
           if (needsWebSearch) {
             // Führe Web-Suche durch für aktuelle Informationen
             console.log('[Chat] Web search triggered for:', input.message);
-            webSearchResults = await performWebSearch(input.message);
+            
+            // Versuche zuerst die verbesserte Suche (Google-Scraping)
+            webSearchResults = await performImprovedWebSearch(input.message);
+            
+            // Fallback auf normale Suche wenn keine Ergebnisse
+            if (!webSearchResults) {
+              webSearchResults = await performWebSearch(input.message);
+            }
+            
             console.log('[Chat] Web search results:', webSearchResults.substring(0, 200));
           }
           
