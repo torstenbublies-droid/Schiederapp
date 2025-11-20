@@ -7,6 +7,7 @@ import { invokeLLM } from "./_core/llm";
 import { performWebSearch, requiresWebSearch } from "./web-search";
 import { performImprovedWebSearch } from "./web-search-improved";
 import { performPerplexitySearch } from "./perplexity-search";
+import { getCurrentWeather, getWeatherForecast } from "./open-meteo-weather";
 import { nanoid } from "nanoid";
 import * as db from "./db";
 import { stadtInfoRouter } from "./routers/stadtInfo";
@@ -376,43 +377,11 @@ export const appRouter = router({
 
   weather: router({
     current: publicProcedure.query(async () => {
-      const apiKey = process.env.OPENWEATHER_API_KEY;
-      if (!apiKey) {
-        return null;
-      }
-      
-      try {
-        const lat = 51.8667;
-        const lon = 9.1833;
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`
-        );
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Weather API error:', error);
-        return null;
-      }
+      return await getCurrentWeather();
     }),
 
     forecast: publicProcedure.query(async () => {
-      const apiKey = process.env.OPENWEATHER_API_KEY;
-      if (!apiKey) {
-        return null;
-      }
-      
-      try {
-        const lat = 51.8667;
-        const lon = 9.1833;
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`
-        );
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Weather forecast API error:', error);
-        return null;
-      }
+      return await getWeatherForecast();
     }),
   }),
 
