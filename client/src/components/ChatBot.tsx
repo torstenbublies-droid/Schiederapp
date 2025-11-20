@@ -63,17 +63,7 @@ export default function ChatBot({ onClose }: ChatBotProps) {
     });
   };
 
-  const quickChips = [
-    "Öffnungszeiten Rathaus",
-    "Aktuelle Veranstaltungen",
-    "Nächste Abfalltermine",
-    "Bürgermeister kontaktieren",
-    "Mängelmelder nutzen",
-  ];
-
-  const handleChipClick = (text: string) => {
-    setInput(text);
-  };
+  // Quick chips removed - users should ask freely
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
@@ -135,25 +125,7 @@ export default function ChatBot({ onClose }: ChatBotProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Chips */}
-        {messages.length === 1 && (
-          <div className="px-4 pb-3 pt-2 border-t border-border bg-muted/30">
-            <p className="text-xs text-muted-foreground mb-2">Vorschläge:</p>
-            <div className="flex flex-wrap gap-2">
-              {quickChips.map((chip, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleChipClick(chip)}
-                  className="text-xs hover:bg-primary hover:text-primary-foreground transition-colors"
-                >
-                  {chip}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Quick chips removed for cleaner UX */}
 
         {/* Input */}
         <form onSubmit={handleSubmit} className="p-4 border-t border-border bg-background">

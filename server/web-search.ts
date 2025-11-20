@@ -122,21 +122,22 @@ export function requiresWebSearch(message: string): boolean {
   
   // Keywords that indicate general/global questions that need web search
   const globalKeywords = [
-    'bundeskanzler', 'kanzler', 'regierung',
-    'bundesregierung', 'ministerpräsident',
+    'bundeskanzler', 'kanzler', 'regierung', 'minister', 'ministerin',
+    'bundesregierung', 'ministerpräsident', 'bauminister', 'bauministerin',
     'deutschland', 'europa', 'welt',
     'aktuell', 'heute', 'gestern', 'morgen',
     'nachrichten', 'news',
     'wetter in', 'temperatur in',
-    'politik', 'politiker',
+    'politik', 'politiker', 'politikerin',
     'wirtschaft', 'börse', 'aktien',
     'sport', 'fußball', 'bundesliga',
     'wissenschaft', 'forschung',
-    'wer ist', 'wer war', 'was ist', 'was war',
+    'wer ist', 'wer war', 'was ist', 'was war', 'wie heißt',
     'wie hoch', 'wie groß', 'wie alt',
-    'wann wurde', 'wo liegt', 'wo ist',
+    'wann wurde', 'wo liegt',
     'hauptstadt von', 'einwohner von',
-    'geschichte von', 'erfinder von'
+    'geschichte von', 'erfinder von',
+    'präsident', 'präsidentin'
   ];
   
   // Keywords that indicate LOCAL questions - NO web search needed
@@ -166,5 +167,6 @@ export function requiresWebSearch(message: string): boolean {
     lowerMessage.includes(keyword)
   );
   
+  // Aktiviere Web-Suche wenn globale Keywords gefunden wurden
   return hasGlobalKeyword;
 }
