@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { performWebSearch, requiresWebSearch } from "./web-search";
 import { performImprovedWebSearch } from "./web-search-improved";
+import { performPerplexitySearch } from "./perplexity-search";
 import { nanoid } from "nanoid";
 import * as db from "./db";
 import { stadtInfoRouter } from "./routers/stadtInfo";
@@ -257,11 +258,18 @@ export const appRouter = router({
             // Führe Web-Suche durch für aktuelle Informationen
             console.log('[Chat] Web search triggered for:', input.message);
             
-            // Versuche zuerst die verbesserte Suche (Google-Scraping)
-            webSearchResults = await performImprovedWebSearch(input.message);
+            // Versuche zuerst Perplexity (beste Qualität)
+            webSearchResults = await performPerplexitySearch(input.message);
             
-            // Fallback auf normale Suche wenn keine Ergebnisse
+            // Fallback auf Google-Scraping wenn Perplexity keine Ergebnisse
             if (!webSearchResults) {
+              console.log('[Chat] Perplexity returned no results, trying Google scraping...');
+              webSearchResults = await performImprovedWebSearch(input.message);
+            }
+            
+            // Fallback auf DuckDuckGo wenn auch Google keine Ergebnisse
+            if (!webSearchResults) {
+              console.log('[Chat] Google scraping returned no results, trying DuckDuckGo...');
               webSearchResults = await performWebSearch(input.message);
             }
             
