@@ -1,5 +1,5 @@
 UPDATE mayor_info SET 
-  name = 'Jörg Bierwirth',
+  name = 'Marco Müllers',
   position = 'Bürgermeister',
   party = NULL,
   email = 'rathaus@schieder-schwalenberg.de',

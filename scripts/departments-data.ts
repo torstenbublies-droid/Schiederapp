@@ -3,7 +3,7 @@ export const departmentsData = [
     name: "Bürgermeister",
     employees: [
       {
-        name: "Jörg Bierwirth",
+        name: "Marco Müllers",
         position: "Bürgermeister",
         phone: "05282 / 601-11",
         fax: "05282 / 601-911",
