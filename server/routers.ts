@@ -247,15 +247,36 @@ export const appRouter = router({
           const isLocal = isLocalQuery(input.message);
           
           let systemPrompt: string;
+          let webSearchResults = '';
+          
+          // Prüfe, ob Web-Suche benötigt wird
+          const needsWebSearch = requiresWebSearch(input.message);
+          
+          if (needsWebSearch) {
+            // Führe Web-Suche durch für aktuelle Informationen
+            console.log('[Chat] Web search triggered for:', input.message);
+            webSearchResults = await performWebSearch(input.message);
+            console.log('[Chat] Web search results:', webSearchResults.substring(0, 200));
+          }
           
           if (isLocal) {
             // Lokale Frage: Durchsuche Datenbank
             const localContext = await searchLocalContext(input.message);
             const formattedContext = formatContextForPrompt(localContext);
-            systemPrompt = createLocalSystemPrompt(formattedContext);
+            
+            // Füge Web-Suche-Ergebnisse hinzu wenn vorhanden
+            const contextWithWebSearch = webSearchResults 
+              ? formattedContext + '\n\n**AKTUELLE INFORMATIONEN AUS DEM INTERNET:**\n' + webSearchResults
+              : formattedContext;
+            
+            systemPrompt = createLocalSystemPrompt(contextWithWebSearch);
           } else {
-            // Globale Frage: Nutze volles GPT-Wissen ohne Datenbank
-            systemPrompt = createGlobalSystemPrompt();
+            // Globale Frage: Nutze Web-Suche + GPT-Wissen
+            const contextWithWebSearch = webSearchResults
+              ? '\n\n**AKTUELLE INFORMATIONEN AUS DEM INTERNET:**\n' + webSearchResults + '\n\nNutze diese aktuellen Informationen für deine Antwort.'
+              : '';
+            
+            systemPrompt = createGlobalSystemPrompt() + contextWithWebSearch;
           }
           
           // Generiere Deep-Links
