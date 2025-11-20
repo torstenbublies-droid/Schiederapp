@@ -6,7 +6,7 @@
 // Koordinaten für Schieder-Schwalenberg (Zentrum)
 const SCHIEDER_LAT = 51.8667;
 const SCHIEDER_LNG = 9.1833;
-const DEFAULT_RADIUS = 5000; // 5km Radius
+const DEFAULT_RADIUS = 10000; // 10km Radius
 
 // Google Places API Key
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || '';
