@@ -97,7 +97,9 @@ export function isProximityQuery(query: string): boolean {
     'in der nähe', 'nähe', 'umgebung', 'umkreis',
     'hier', 'bei mir', 'in schieder',
     'wo finde ich', 'wo gibt es', 'gibt es',
-    'wo kann ich', 'suche'
+    'wo kann ich', 'suche', 'wo ist',
+    'nächste', 'nächster', 'nächstes',
+    'zeige mir', 'liste'
   ];
   
   // Prüfe auf Proximity-Keywords
