@@ -21,6 +21,22 @@ interface TileProps {
 }
 
 function Tile({ title, icon, href, color = "bg-primary" }: TileProps) {
+  // Check if href is external
+  const isExternal = href.startsWith('http');
+  
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        <Card className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer tile-shadow h-full flex flex-col items-center justify-center text-center gap-3">
+          <div className={`${color} text-white p-4 rounded-2xl relative`}>
+            {icon}
+          </div>
+          <h3 className="font-semibold text-base">{title}</h3>
+        </Card>
+      </a>
+    );
+  }
+  
   return (
     <Link href={href}>
       <Card className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer tile-shadow h-full flex flex-col items-center justify-center text-center gap-3">
@@ -78,7 +94,7 @@ export default function Home() {
     { title: "Tourismus & Freizeit", icon: <Palmtree size={28} />, href: "/tourism", color: "bg-secondary" },
     { title: "Bildung & Familie", icon: <GraduationCap size={28} />, href: "/education", color: "bg-purple-600" },
     { title: "Vereine", icon: <UserPlus size={28} />, href: "/clubs", color: "bg-amber-600" },
-    { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "/council", color: "bg-indigo-600" },
+    { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "https://sessionnet.owl-it.de/schieder_schwalenberg/bi/info.asp", color: "bg-indigo-600" },
     { title: "Kontakt & Anliegen", icon: <Phone size={28} />, href: "/contact", color: "bg-primary" },
 
   ];
