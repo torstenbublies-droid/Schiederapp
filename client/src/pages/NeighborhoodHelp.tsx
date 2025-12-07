@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Clock, AlertCircle, Heart } from "lucide-react";
+import { MapPin, Clock, AlertCircle, Heart, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 
 // Mock-Daten für Demo-Zwecke
 const MOCK_CATEGORIES = [
@@ -71,6 +72,7 @@ const MOCK_OFFERS = [
 ];
 
 export default function NeighborhoodHelp() {
+  const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const getCategoryById = (id: string) => MOCK_CATEGORIES.find(c => c.id === id);
@@ -132,6 +134,14 @@ export default function NeighborhoodHelp() {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="mb-8">
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/")}
+          className="mb-4 flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Zurück zur Startseite
+        </Button>
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
           <Heart className="w-8 h-8 text-primary" />
           Nachbarschaftshilfe
