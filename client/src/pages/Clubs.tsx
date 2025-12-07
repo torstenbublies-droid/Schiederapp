@@ -1,7 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowLeft, Users, Trophy, Phone, Mail, MapPin, ExternalLink } from "lucide-react";
+import { 
+  ArrowLeft, Users, Trophy, Phone, Mail, MapPin, ExternalLink,
+  Anchor, Fish, Plane, Target, Waves, Ship, Activity,
+  Music, Beer, Shirt, Footprints, Car, GraduationCap, Flame,
+  Castle, Baby, Building2
+} from "lucide-react";
 import { useState } from "react";
 
 interface Club {
@@ -13,51 +18,53 @@ interface Club {
   address?: string;
   website?: string;
   category: 'sport' | 'general';
+  icon: any;
+  color: string;
 }
 
 const clubs: Club[] = [
   // Sportvereine
-  { id: 's1', name: 'Pyrmonter Segel- und Wassersportclub e.V.', category: 'sport', phone: '05236/256', website: 'www.pysc.de' },
-  { id: 's2', name: 'Angelsportverein Schieder', category: 'sport', contact: 'Marc Beckmeier', address: 'Pyrmonter Straße 10, 32816 Schieder-Schwalenberg' },
-  { id: 's3', name: 'Angelsportverein Schieder-Glashütte', category: 'sport', contact: 'Rinat Schwarzkopf', phone: '05235/97729' },
-  { id: 's4', name: 'FC Schalke 04 Fan-Club Brakelsiek', category: 'sport', contact: 'Peter Meinberg', phone: '0170/2139056' },
-  { id: 's5', name: 'Luftsportgemeinschaft Lippe Südost e.V.', category: 'sport', website: 'www.lsg-lippe.de' },
-  { id: 's6', name: 'Modellflugclub Burgschwalbe', category: 'sport', contact: 'Dirk Vogel', phone: '05282/2084968', website: 'www.mfc-burgschwalbe.jimdo.com' },
-  { id: 's7', name: 'Schützengruppe Siekholz', category: 'sport', contact: 'Werner Ridder', phone: '0160 1806290', website: 'www.siekholz.de' },
-  { id: 's8', name: 'DLRG Ortsgruppe Schieder-Schwalenberg', category: 'sport', contact: 'Bodo Schultz', phone: '05282/258', website: 'www.schieder-schwalenberg.dlrg.de' },
-  { id: 's9', name: 'Kanu-Club Schieder e.V.', category: 'sport', contact: 'Christof Basener', phone: '05151/821582' },
-  { id: 's10', name: 'Ruderclub Schieder am Emmerstausee von 1985 e.V.', category: 'sport', website: 'www.ruderclub-schieder.de', phone: '05234-204845' },
-  { id: 's11', name: 'Schießsportverein Lothe', category: 'sport', contact: 'Meik Waldvogt', phone: '05233/953652' },
-  { id: 's12', name: 'Segel-Club Hameln e. V.', category: 'sport', phone: '05151/980855', website: 'www.segel-club-hameln.de' },
-  { id: 's13', name: 'Segel-Club Schieder-Emmersee', category: 'sport', website: 'www.scse.de' },
-  { id: 's14', name: 'Tennisclub Schieder-Schwalenberg', category: 'sport', contact: 'Stephan Müller', phone: '05282 208 312', website: 'www.tennisclub-schieder.de' },
-  { id: 's15', name: 'TG Siekholz', category: 'sport', contact: 'Martin Schulz', phone: '05282/969556' },
-  { id: 's16', name: 'TSV Lothe', category: 'sport', contact: 'Rolf Unglaube', phone: '05233/4717', website: 'www.tsv-lothe.de' },
-  { id: 's17', name: 'TuS Wöbbel', category: 'sport', contact: 'Christian Hansmann', phone: '05233/4710' },
-  { id: 's18', name: 'TuS 08 Brakelsiek', category: 'sport', contact: 'Hartmut Tewesmeier', phone: '05284 5481', website: 'www.tus08brakelsiek.de' },
-  { id: 's19', name: 'TuS Schieder-Schwalenberg', category: 'sport', contact: 'Kerstin Monsehr', website: 'www.tus-schieder-schwalenberg.de' },
+  { id: 's1', name: 'Pyrmonter Segel- und Wassersportclub e.V.', category: 'sport', phone: '05236/256', website: 'www.pysc.de', icon: Ship, color: '#0ea5e9' },
+  { id: 's2', name: 'Angelsportverein Schieder', category: 'sport', contact: 'Marc Beckmeier', address: 'Pyrmonter Straße 10, 32816 Schieder-Schwalenberg', icon: Fish, color: '#06b6d4' },
+  { id: 's3', name: 'Angelsportverein Schieder-Glashütte', category: 'sport', contact: 'Rinat Schwarzkopf', phone: '05235/97729', icon: Fish, color: '#06b6d4' },
+  { id: 's4', name: 'FC Schalke 04 Fan-Club Brakelsiek', category: 'sport', contact: 'Peter Meinberg', phone: '0170/2139056', icon: Trophy, color: '#3b82f6' },
+  { id: 's5', name: 'Luftsportgemeinschaft Lippe Südost e.V.', category: 'sport', website: 'www.lsg-lippe.de', icon: Plane, color: '#8b5cf6' },
+  { id: 's6', name: 'Modellflugclub Burgschwalbe', category: 'sport', contact: 'Dirk Vogel', phone: '05282/2084968', website: 'www.mfc-burgschwalbe.jimdo.com', icon: Plane, color: '#8b5cf6' },
+  { id: 's7', name: 'Schützengruppe Siekholz', category: 'sport', contact: 'Werner Ridder', phone: '0160 1806290', website: 'www.siekholz.de', icon: Target, color: '#dc2626' },
+  { id: 's8', name: 'DLRG Ortsgruppe Schieder-Schwalenberg', category: 'sport', contact: 'Bodo Schultz', phone: '05282/258', website: 'www.schieder-schwalenberg.dlrg.de', icon: Waves, color: '#ef4444' },
+  { id: 's9', name: 'Kanu-Club Schieder e.V.', category: 'sport', contact: 'Christof Basener', phone: '05151/821582', icon: Anchor, color: '#14b8a6' },
+  { id: 's10', name: 'Ruderclub Schieder am Emmerstausee von 1985 e.V.', category: 'sport', website: 'www.ruderclub-schieder.de', phone: '05234-204845', icon: Anchor, color: '#14b8a6' },
+  { id: 's11', name: 'Schießsportverein Lothe', category: 'sport', contact: 'Meik Waldvogt', phone: '05233/953652', icon: Target, color: '#dc2626' },
+  { id: 's12', name: 'Segel-Club Hameln e. V.', category: 'sport', phone: '05151/980855', website: 'www.segel-club-hameln.de', icon: Ship, color: '#0ea5e9' },
+  { id: 's13', name: 'Segel-Club Schieder-Emmersee', category: 'sport', website: 'www.scse.de', icon: Ship, color: '#0ea5e9' },
+  { id: 's14', name: 'Tennisclub Schieder-Schwalenberg', category: 'sport', contact: 'Stephan Müller', phone: '05282 208 312', website: 'www.tennisclub-schieder.de', icon: Activity, color: '#f59e0b' },
+  { id: 's15', name: 'TG Siekholz', category: 'sport', contact: 'Martin Schulz', phone: '05282/969556', icon: Activity, color: '#10b981' },
+  { id: 's16', name: 'TSV Lothe', category: 'sport', contact: 'Rolf Unglaube', phone: '05233/4717', website: 'www.tsv-lothe.de', icon: Activity, color: '#10b981' },
+  { id: 's17', name: 'TuS Wöbbel', category: 'sport', contact: 'Christian Hansmann', phone: '05233/4710', icon: Activity, color: '#10b981' },
+  { id: 's18', name: 'TuS 08 Brakelsiek', category: 'sport', contact: 'Hartmut Tewesmeier', phone: '05284 5481', website: 'www.tus08brakelsiek.de', icon: Activity, color: '#10b981' },
+  { id: 's19', name: 'TuS Schieder-Schwalenberg', category: 'sport', contact: 'Kerstin Monsehr', website: 'www.tus-schieder-schwalenberg.de', icon: Activity, color: '#10b981' },
   
-  // Allgemeine Vereine (Top 30)
-  { id: 'v1', name: 'OPEL-Club Schieder-Schwalenberg', category: 'general', contact: 'Sascha Schröder', phone: '05284/5527', website: 'www.opelclub-schieder-schwalenberg.de' },
-  { id: 'v2', name: 'PS-Freunde Lippe', category: 'general', contact: 'Stefan Hilkemeier' },
-  { id: 'v3', name: 'Schwalenberger Brauzunft', category: 'general', contact: 'Udo Strüber', phone: '0151/14 22 39 57', website: 'www.schwalenberger-brauzunft.de' },
-  { id: 'v4', name: 'Trachtengilde Schwalenberg', category: 'general', contact: 'André Eikermann', phone: '05284/5639', website: 'www.trachtengilde-schwalenberg.de' },
-  { id: 'v5', name: 'VFDG - Verein zur Förderung alter Lippischer Gebräuche', category: 'general', contact: 'Frank Wiehemeier', phone: '05282/948263' },
-  { id: 'v6', name: 'Wanderarbeiterverein Lothe', category: 'general', contact: 'Jürgen Rogat', phone: '05233/5860' },
-  { id: 'v7', name: 'Dachkammer-Chor', category: 'general', contact: 'Teo Wedding' },
-  { id: 'v8', name: 'MGV Wöbbel', category: 'general', contact: 'Ludolf Beermann', phone: '05233/8349', website: 'choralle-mgv.de' },
-  { id: 'v9', name: 'Musikzug der Freiwilligen Feuerwehr', category: 'general', website: 'www.feuerwehr-schieder-schwalenberg.de' },
-  { id: 'v10', name: 'Ökumenischer Chor', category: 'general', contact: 'Guido Theis', phone: '05282/6635' },
-  { id: 'v11', name: 'Spielmannszug Brakelsiek', category: 'general', contact: 'Larissa Wienke', website: 'www.brakelsiek.de' },
-  { id: 'v12', name: 'Europäisches Laboratorium e.V.', category: 'general', phone: '05284/9439473', website: 'eu-lab.de' },
-  { id: 'v13', name: 'Förderverein der Grundschule Schwalenberg', category: 'general', contact: 'Fabienne Schweizer', phone: '05282-601 600', website: 'www.gs-schwalenberg.de' },
-  { id: 'v14', name: 'Förderverein der Brakelsieker Mehrzweckhalle', category: 'general', contact: 'Wolfgang Ridder', phone: '05284/5366' },
-  { id: 'v15', name: 'Förderverein der Grundschule Schieder', category: 'general', contact: 'Sonja Morgenthal' },
-  { id: 'v16', name: 'Bürgerstiftung Schwalenberg', category: 'general', contact: 'Marcus Rohde', phone: '0170 6312734', website: 'www.buergerstiftung-schwalenberg.de' },
-  { id: 'v17', name: 'Förderverein Jugendfeuerwehr Schieder-Schwalenberg', category: 'general', contact: 'Marco Tölle', website: 'www.feuerwehr-schieder-schwalenberg.de' },
-  { id: 'v18', name: 'Förderverein Löschzug Schieder', category: 'general', contact: 'Heinz-Günter Ermer', phone: '05284/5869', website: 'www.feuerwehr-schieder-schwalenberg.de' },
-  { id: 'v19', name: 'Förderverein Schloss und Schlosspark Schieder', category: 'general', contact: 'Detlev Hundt', phone: '05282/96 93 01', website: 'www.schlosspark-schieder.de' },
-  { id: 'v20', name: 'Ankerplatz - Offene Jugendarbeit', category: 'general', contact: 'Maike Derstvensek', phone: '05232-79 85 987' },
+  // Allgemeine Vereine
+  { id: 'v1', name: 'OPEL-Club Schieder-Schwalenberg', category: 'general', contact: 'Sascha Schröder', phone: '05284/5527', website: 'www.opelclub-schieder-schwalenberg.de', icon: Car, color: '#6366f1' },
+  { id: 'v2', name: 'PS-Freunde Lippe', category: 'general', contact: 'Stefan Hilkemeier', icon: Car, color: '#6366f1' },
+  { id: 'v3', name: 'Schwalenberger Brauzunft', category: 'general', contact: 'Udo Strüber', phone: '0151/14 22 39 57', website: 'www.schwalenberger-brauzunft.de', icon: Beer, color: '#f59e0b' },
+  { id: 'v4', name: 'Trachtengilde Schwalenberg', category: 'general', contact: 'André Eikermann', phone: '05284/5639', website: 'www.trachtengilde-schwalenberg.de', icon: Shirt, color: '#ec4899' },
+  { id: 'v5', name: 'VFDG - Verein zur Förderung alter Lippischer Gebräuche', category: 'general', contact: 'Frank Wiehemeier', phone: '05282/948263', icon: Footprints, color: '#8b5cf6' },
+  { id: 'v6', name: 'Wanderarbeiterverein Lothe', category: 'general', contact: 'Jürgen Rogat', phone: '05233/5860', icon: Footprints, color: '#8b5cf6' },
+  { id: 'v7', name: 'Dachkammer-Chor', category: 'general', contact: 'Teo Wedding', icon: Music, color: '#14b8a6' },
+  { id: 'v8', name: 'MGV Wöbbel', category: 'general', contact: 'Ludolf Beermann', phone: '05233/8349', website: 'choralle-mgv.de', icon: Music, color: '#14b8a6' },
+  { id: 'v9', name: 'Musikzug der Freiwilligen Feuerwehr', category: 'general', website: 'www.feuerwehr-schieder-schwalenberg.de', icon: Music, color: '#14b8a6' },
+  { id: 'v10', name: 'Ökumenischer Chor', category: 'general', contact: 'Guido Theis', phone: '05282/6635', icon: Music, color: '#14b8a6' },
+  { id: 'v11', name: 'Spielmannszug Brakelsiek', category: 'general', contact: 'Larissa Wienke', website: 'www.brakelsiek.de', icon: Music, color: '#14b8a6' },
+  { id: 'v12', name: 'Europäisches Laboratorium e.V.', category: 'general', phone: '05284/9439473', website: 'eu-lab.de', icon: Building2, color: '#0ea5e9' },
+  { id: 'v13', name: 'Förderverein der Grundschule Schwalenberg', category: 'general', contact: 'Fabienne Schweizer', phone: '05282-601 600', website: 'www.gs-schwalenberg.de', icon: GraduationCap, color: '#3b82f6' },
+  { id: 'v14', name: 'Förderverein der Brakelsieker Mehrzweckhalle', category: 'general', contact: 'Wolfgang Ridder', phone: '05284/5366', icon: Building2, color: '#0ea5e9' },
+  { id: 'v15', name: 'Förderverein der Grundschule Schieder', category: 'general', contact: 'Sonja Morgenthal', icon: GraduationCap, color: '#3b82f6' },
+  { id: 'v16', name: 'Bürgerstiftung Schwalenberg', category: 'general', contact: 'Marcus Rohde', phone: '0170 6312734', website: 'www.buergerstiftung-schwalenberg.de', icon: Castle, color: '#a855f7' },
+  { id: 'v17', name: 'Förderverein Jugendfeuerwehr Schieder-Schwalenberg', category: 'general', contact: 'Marco Tölle', website: 'www.feuerwehr-schieder-schwalenberg.de', icon: Flame, color: '#ef4444' },
+  { id: 'v18', name: 'Förderverein Löschzug Schieder', category: 'general', contact: 'Heinz-Günter Ermer', phone: '05284/5869', website: 'www.feuerwehr-schieder-schwalenberg.de', icon: Flame, color: '#ef4444' },
+  { id: 'v19', name: 'Förderverein Schloss und Schlosspark Schieder', category: 'general', contact: 'Detlev Hundt', phone: '05282/96 93 01', website: 'www.schlosspark-schieder.de', icon: Castle, color: '#a855f7' },
+  { id: 'v20', name: 'Ankerplatz - Offene Jugendarbeit', category: 'general', contact: 'Maike Derstvensek', phone: '05232-79 85 987', icon: Baby, color: '#f97316' },
 ];
 
 export default function Clubs() {
@@ -109,66 +116,71 @@ export default function Clubs() {
 
         {/* Clubs List */}
         <div className="grid gap-4">
-          {displayClubs.map((club) => (
-            <Card key={club.id} className="p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-start gap-4">
-                <div className="bg-primary/10 p-3 rounded-lg">
-                  {activeTab === 'sport' ? (
-                    <Trophy className="h-6 w-6 text-primary" />
-                  ) : (
-                    <Users className="h-6 w-6 text-primary" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">{club.name}</h3>
-                  
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    {club.contact && (
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <span>{club.contact}</span>
-                      </div>
-                    )}
-                    {club.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        <a href={`tel:${club.phone}`} className="hover:text-primary">
-                          {club.phone}
-                        </a>
-                      </div>
-                    )}
-                    {club.email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        <a href={`mailto:${club.email}`} className="hover:text-primary">
-                          {club.email}
-                        </a>
-                      </div>
-                    )}
-                    {club.address && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{club.address}</span>
-                      </div>
-                    )}
-                    {club.website && (
-                      <div className="flex items-center gap-2">
-                        <ExternalLink className="h-4 w-4" />
-                        <a 
-                          href={`https://${club.website}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="hover:text-primary hover:underline"
-                        >
-                          {club.website}
-                        </a>
-                      </div>
-                    )}
+          {displayClubs.map((club) => {
+            const IconComponent = club.icon;
+            return (
+              <Card key={club.id} className="p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div 
+                    className="p-3 rounded-lg"
+                    style={{ backgroundColor: `${club.color}15` }}
+                  >
+                    <IconComponent 
+                      className="h-6 w-6" 
+                      style={{ color: club.color }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-2">{club.name}</h3>
+                    
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      {club.contact && (
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          <span>{club.contact}</span>
+                        </div>
+                      )}
+                      {club.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          <a href={`tel:${club.phone}`} className="hover:text-primary">
+                            {club.phone}
+                          </a>
+                        </div>
+                      )}
+                      {club.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          <a href={`mailto:${club.email}`} className="hover:text-primary">
+                            {club.email}
+                          </a>
+                        </div>
+                      )}
+                      {club.address && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{club.address}</span>
+                        </div>
+                      )}
+                      {club.website && (
+                        <div className="flex items-center gap-2">
+                          <ExternalLink className="h-4 w-4" />
+                          <a 
+                            href={`https://${club.website}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="hover:text-primary hover:underline"
+                          >
+                            {club.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
 
         {/* Info Box */}
@@ -191,4 +203,3 @@ export default function Clubs() {
     </div>
   );
 }
-
