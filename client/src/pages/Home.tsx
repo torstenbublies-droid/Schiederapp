@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import { 
   Newspaper, Calendar, Building2, FileText, Wrench, 
   Trash2, AlertTriangle, Palmtree, GraduationCap, 
-  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus 
+  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus, Heart 
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
@@ -94,6 +94,7 @@ export default function Home() {
     { title: "Tourismus & Freizeit", icon: <Palmtree size={28} />, href: "/tourism", color: "bg-secondary" },
     { title: "Bildung & Familie", icon: <GraduationCap size={28} />, href: "/education", color: "bg-purple-600" },
     { title: "Vereine", icon: <UserPlus size={28} />, href: "/clubs", color: "bg-amber-600" },
+    { title: "Nachbarschaftshilfe", icon: <Heart size={28} />, href: "/neighborhood-help", color: "bg-pink-600" },
     { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "https://sessionnet.owl-it.de/schieder_schwalenberg/bi/info.asp", color: "bg-indigo-600" },
     { title: "Kontakt & Anliegen", icon: <Phone size={28} />, href: "/contact", color: "bg-primary" },
 

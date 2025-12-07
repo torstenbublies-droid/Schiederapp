@@ -27,6 +27,7 @@ import Contact from "./pages/Contact";
 import AdminContact from "./pages/AdminContact";
 import AdminNotifications from "./pages/AdminNotifications";
 import Notifications from "./pages/Notifications";
+import NeighborhoodHelp from "./pages/NeighborhoodHelp";
 
 import { useNotificationListener } from "./hooks/useNotificationListener";
 
@@ -56,6 +57,7 @@ function Router() {
       <Route path={"/admin/contact"} component={AdminContact} />
       <Route path={"/admin/notifications"} component={AdminNotifications} />
       <Route path={"/notifications"} component={Notifications} />
+      <Route path={"/neighborhood-help"} component={NeighborhoodHelp} />
 
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
