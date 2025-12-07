@@ -30,6 +30,7 @@ import Notifications from "./pages/Notifications";
 import NeighborhoodHelp from "./pages/NeighborhoodHelp";
 
 import { useNotificationListener } from "./hooks/useNotificationListener";
+import Header from "./components/Header";
 
 function Router() {
   return (
@@ -74,6 +75,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <Header />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
