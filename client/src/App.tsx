@@ -23,6 +23,7 @@ import ServiceHundesteuer from "./pages/ServiceHundesteuer";
 import ServiceFuehrungszeugnis from "./pages/ServiceFuehrungszeugnis";
 import ServiceBauen from "./pages/ServiceBauen";
 import ServiceGewerbe from "./pages/ServiceGewerbe";
+import PassportService from "./pages/services/PassportService";
 import Contact from "./pages/Contact";
 import AdminContact from "./pages/AdminContact";
 import AdminNotifications from "./pages/AdminNotifications";
@@ -47,6 +48,7 @@ function Router() {
       <Route path={"/service/fuehrungszeugnis"} component={ServiceFuehrungszeugnis} />
       <Route path={"/service/bauen"} component={ServiceBauen} />
       <Route path={"/service/gewerbe"} component={ServiceGewerbe} />
+      <Route path={"/service/paesse"} component={PassportService} />
       <Route path={"/issues"} component={IssueReports} />
       <Route path={"/waste"} component={Waste} />
       <Route path={"/alerts"} component={Alerts} />

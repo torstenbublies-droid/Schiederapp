@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, FileText, Dog, Building, Briefcase } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Dog, Building, Briefcase, CreditCard } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 interface Service {
@@ -39,6 +39,13 @@ const services: Service[] = [
     icon: <FileText size={28} />,
     route: "/service/fuehrungszeugnis",
     color: "bg-purple-600"
+  },
+  {
+    id: "paesse",
+    title: "Pässe beantragen",
+    icon: <CreditCard size={28} />,
+    route: "/service/paesse",
+    color: "bg-red-600"
   },
 
   {
