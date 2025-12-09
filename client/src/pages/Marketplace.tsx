@@ -50,8 +50,8 @@ const MOCK_LISTINGS = [
   {
     id: "2",
     title: "Kinderbett mit Matratze",
-    description: "Weißes Kinderbett (70x140cm) inkl. Matratze zu verkaufen. Sehr guter Zustand, keine Beschädigungen. Wurde nur 2 Jahre genutzt.",
-    price: "120",
+    description: "Weißes Kinderbett (70x140cm) inkl. Matratze zu verschenken. Sehr guter Zustand, keine Beschädigungen. Wurde nur 2 Jahre genutzt.",
+    price: "zu verschenken",
     category: "furniture",
     location: "Schwalenberg",
     author: "Familie Müller",
