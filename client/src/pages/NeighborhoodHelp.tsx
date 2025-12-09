@@ -1,139 +1,104 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Clock, AlertCircle, Heart, ArrowLeft } from "lucide-react";
+import { 
+  ArrowLeft, HelpCircle, HandHelping, MapPin, User, 
+  AlertCircle, ChevronDown, Filter, List
+} from "lucide-react";
 import { useLocation } from "wouter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// Mock-Daten für Demo-Zwecke
-const MOCK_CATEGORIES = [
-  { id: "cat-1", name: "Einkaufen & Besorgungen", icon: "🛒", color: "#4CAF50" },
-  { id: "cat-2", name: "Haushalt & Handwerk", icon: "🔧", color: "#FF9800" },
-  { id: "cat-3", name: "Kinder & Familie", icon: "👶", color: "#E91E63" },
-  { id: "cat-4", name: "Seniorenhilfe & Begleitung", icon: "👴", color: "#9C27B0" },
-  { id: "cat-5", name: "Tiere & Gassi gehen", icon: "🐕", color: "#795548" },
-  { id: "cat-6", name: "Technik & Bürokratie", icon: "💻", color: "#2196F3" },
-  { id: "cat-7", name: "Leihen & Teilen", icon: "🤝", color: "#00BCD4" },
+// Mock-Daten
+const CATEGORIES = [
+  { id: "all", name: "Alle Kategorien", emoji: "📋" },
+  { id: "shopping", name: "Einkaufen", emoji: "🛒" },
+  { id: "transport", name: "Fahrdienste", emoji: "🚗" },
+  { id: "childcare", name: "Kinderbetreuung", emoji: "👶" },
+  { id: "companionship", name: "Begleitung", emoji: "🤝" },
+  { id: "garden", name: "Haus & Garten", emoji: "🏡" },
+  { id: "tech", name: "Technik-Hilfe", emoji: "💻" },
+  { id: "pets", name: "Haustierbetreuung", emoji: "🐕" },
+  { id: "other", name: "Sonstiges", emoji: "📌" },
 ];
 
 const MOCK_REQUESTS = [
   {
     id: "1",
-    type: "request",
-    categoryId: "cat-1",
-    title: "Hilfe beim Wocheneinkauf gesucht",
-    description: "Ich bin 78 Jahre alt und benötige Unterstützung beim wöchentlichen Einkauf im Supermarkt.",
-    locationStreet: "Bahnhofstraße",
-    durationMinutes: 60,
-    isUrgent: false,
-    compensation: "kostenlos",
-    createdAt: new Date("2024-12-07"),
+    title: "Hilfe beim Einkaufen gesucht",
+    description: "Hallo zusammen, ich bin 82 und suche jemanden, der mir einmal pro Woche beim Einkaufen helfen kann. Gerne auch gegen kleine Aufwandsentschädigung. Standort: Horn-Bad Meinberg Zentrum.",
+    category: "shopping",
+    location: "Zentrum",
+    author: "Maria Schmidt",
+    urgent: true,
+    type: "request"
   },
   {
     id: "2",
-    type: "request",
-    categoryId: "cat-2",
-    title: "Glühbirne wechseln in hoher Decke",
-    description: "Ich komme nicht mehr an die Deckenlampe im Flur. Die Glühbirne ist kaputt.",
-    locationStreet: "Kirchstraße",
-    durationMinutes: 15,
-    isUrgent: true,
-    compensation: "Kaffee und Kuchen",
-    createdAt: new Date("2024-12-06"),
+    title: "Gartenarbeit - Rasen mähen",
+    description: "Suche Hilfe beim Rasenmähen für meinen ca. 200qm großen Garten. Rasenmäher ist vorhanden. Wäre super, wenn das alle 2 Wochen gemacht werden könnte. Standort: Silbergrund.",
+    category: "garden",
+    location: "Silbergrund",
+    author: "Klaus Müller",
+    urgent: false,
+    type: "request"
   },
-];
-
-const MOCK_OFFERS = [
   {
     id: "3",
-    type: "offer",
-    categoryId: "cat-1",
     title: "Biete Einkaufshilfe an",
-    description: "Ich gehe regelmäßig einkaufen und kann gerne für ältere Menschen miteinkaufen.",
-    locationStreet: "Hauptstraße",
-    durationMinutes: 60,
-    isUrgent: false,
-    compensation: "kostenlos",
-    createdAt: new Date("2024-12-05"),
+    description: "Ich gehe regelmäßig einkaufen und kann gerne für ältere Menschen miteinkaufen. Ich habe ein Auto und Zeit am Vormittag.",
+    category: "shopping",
+    location: "Hauptstraße",
+    author: "Anna Weber",
+    urgent: false,
+    type: "offer"
   },
   {
     id: "4",
-    type: "offer",
-    categoryId: "cat-2",
     title: "Handwerkliche Hilfe - Kleinreparaturen",
-    description: "Ich bin gelernter Schreiner und biete Hilfe bei kleineren Reparaturen im Haushalt an.",
-    locationStreet: "Emmerstraße",
-    durationMinutes: 120,
-    isUrgent: false,
-    compensation: "nach Vereinbarung",
-    createdAt: new Date("2024-12-04"),
+    description: "Ich bin gelernter Schreiner und biete Hilfe bei kleineren Reparaturen im Haushalt an. Kostenlos für Senioren.",
+    category: "garden",
+    location: "Emmerstraße",
+    author: "Thomas Klein",
+    urgent: false,
+    type: "offer"
   },
 ];
 
 export default function NeighborhoodHelp() {
   const [, setLocation] = useLocation();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"requests" | "offers" | "all">("requests");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showUrgentOnly, setShowUrgentOnly] = useState(false);
 
-  const getCategoryById = (id: string) => MOCK_CATEGORIES.find(c => c.id === id);
-
-  const filterByCategory = (items: typeof MOCK_REQUESTS) => {
-    if (!selectedCategory) return items;
-    return items.filter(item => item.categoryId === selectedCategory);
-  };
-
-  const HelpCard = ({ item }: { item: typeof MOCK_REQUESTS[0] }) => {
-    const category = getCategoryById(item.categoryId);
+  const filteredItems = MOCK_REQUESTS.filter(item => {
+    // Filter by tab
+    if (activeTab === "requests" && item.type !== "request") return false;
+    if (activeTab === "offers" && item.type !== "offer") return false;
     
-    return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{category?.icon}</span>
-                <Badge variant="outline" style={{ borderColor: category?.color }}>
-                  {category?.name}
-                </Badge>
-                {item.isUrgent && (
-                  <Badge variant="destructive" className="flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Dringend
-                  </Badge>
-                )}
-              </div>
-              <CardTitle className="text-lg">{item.title}</CardTitle>
-            </div>
-          </div>
-          <CardDescription className="flex items-center gap-4 text-sm mt-2">
-            <span className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              {item.locationStreet}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {item.durationMinutes} Min.
-            </span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">
-              💰 {item.compensation}
-            </span>
-            <Button size="sm" variant={item.type === "request" ? "default" : "outline"}>
-              {item.type === "request" ? "Hilfe anbieten" : "Kontaktieren"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    // Filter by category
+    if (selectedCategory !== "all" && item.category !== selectedCategory) return false;
+    
+    // Filter by urgent
+    if (showUrgentOnly && !item.urgent) return false;
+    
+    return true;
+  });
+
+  const getCategoryEmoji = (categoryId: string) => {
+    return CATEGORIES.find(c => c.id === categoryId)?.emoji || "📌";
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
-      <div className="mb-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Back Button */}
+      <div className="container mx-auto px-4 pt-4">
         <Button
           variant="ghost"
           onClick={() => setLocation("/")}
@@ -142,88 +107,172 @@ export default function NeighborhoodHelp() {
           <ArrowLeft className="w-4 h-4" />
           Zurück zur Startseite
         </Button>
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <Heart className="w-8 h-8 text-primary" />
-          Nachbarschaftshilfe
-        </h1>
-        <p className="text-muted-foreground">
-          Helfen Sie Ihren Nachbarn oder finden Sie Unterstützung in Ihrer Nähe
-        </p>
       </div>
 
-      {/* Kategorien Filter */}
-      <div className="mb-6">
-        <h2 className="text-sm font-medium mb-3">Kategorien</h2>
-        <div className="flex flex-wrap gap-2">
+      <div className="container mx-auto px-4 pb-8 max-w-5xl">
+        {/* Info Box */}
+        <Card className="mb-6 bg-green-50 border-green-200">
+          <div className="p-4 flex items-start gap-3">
+            <div className="bg-white rounded-full p-2">
+              <HelpCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Wie funktioniert's?</h3>
+              <p className="text-sm text-gray-700">
+                Hier können Sie Hilfe anbieten oder Hilfe suchen. Ob Einkaufen, Handwerk, Kinderbetreuung oder Seniorenhilfe - gemeinsam sind wir stärker! 💪
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card className="bg-orange-50 border-orange-200 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="p-6 flex items-center gap-4">
+              <div className="bg-orange-500 rounded-full p-4">
+                <HelpCircle className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-orange-900">Ich brauche Hilfe</h3>
+                <p className="text-sm text-orange-700">Gesuch erstellen und Helfer finden</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-green-50 border-green-200 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="p-6 flex items-center gap-4">
+              <div className="bg-green-500 rounded-full p-4">
+                <HandHelping className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-green-900">Ich möchte helfen</h3>
+                <p className="text-sm text-green-700">Angebot erstellen und anderen helfen</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
           <Button
-            variant={selectedCategory === null ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory(null)}
+            variant={activeTab === "requests" ? "default" : "outline"}
+            onClick={() => setActiveTab("requests")}
+            className={activeTab === "requests" ? "bg-orange-500 hover:bg-orange-600" : ""}
+          >
+            Gesuche
+          </Button>
+          <Button
+            variant={activeTab === "offers" ? "default" : "outline"}
+            onClick={() => setActiveTab("offers")}
+          >
+            Angebote
+          </Button>
+          <Button
+            variant={activeTab === "all" ? "default" : "outline"}
+            onClick={() => setActiveTab("all")}
           >
             Alle
           </Button>
-          {MOCK_CATEGORIES.map((cat) => (
-            <Button
-              key={cat.id}
-              variant={selectedCategory === cat.id ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(cat.id)}
-              className="flex items-center gap-1"
-            >
-              <span>{cat.icon}</span>
-              {cat.name}
-            </Button>
+        </div>
+
+        {/* Filters */}
+        <Card className="mb-6">
+          <div className="p-4 flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium">Filter:</span>
+            </div>
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Alle Kategorien" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map(cat => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.emoji} {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="urgent" 
+                checked={showUrgentOnly}
+                onCheckedChange={(checked) => setShowUrgentOnly(checked as boolean)}
+              />
+              <label htmlFor="urgent" className="text-sm flex items-center gap-1 cursor-pointer">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+                Nur Dringend
+              </label>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <Button variant="default" size="sm" className="bg-blue-500 hover:bg-blue-600">
+                <List className="w-4 h-4 mr-1" />
+                Liste
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Items List */}
+        <div className="space-y-4">
+          {filteredItems.map(item => (
+            <Card key={item.id} className="hover:shadow-lg transition-shadow">
+              <div className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="text-4xl">
+                    {getCategoryEmoji(item.category)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                        {item.urgent && (
+                          <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded">
+                            Dringend
+                          </span>
+                        )}
+                      </div>
+                      <Button className="bg-green-500 hover:bg-green-600 text-white">
+                        Anfragen
+                      </Button>
+                    </div>
+                    <p className="text-gray-700 mb-3">{item.description}</p>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{item.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        <span>{item.author}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
-      </div>
 
-      {/* Tabs für Gesuche und Angebote */}
-      <Tabs defaultValue="requests" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="requests">
-            Gesuche ({filterByCategory(MOCK_REQUESTS).length})
-          </TabsTrigger>
-          <TabsTrigger value="offers">
-            Angebote ({filterByCategory(MOCK_OFFERS).length})
-          </TabsTrigger>
-        </TabsList>
+        {/* Empty State */}
+        {filteredItems.length === 0 && (
+          <Card className="p-12 text-center">
+            <p className="text-gray-500">Keine Einträge gefunden. Passen Sie die Filter an oder erstellen Sie einen neuen Eintrag.</p>
+          </Card>
+        )}
 
-        <TabsContent value="requests">
-          <div className="grid gap-4 md:grid-cols-2">
-            {filterByCategory(MOCK_REQUESTS).map((item) => (
-              <HelpCard key={item.id} item={item} />
-            ))}
-          </div>
-          {filterByCategory(MOCK_REQUESTS).length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              Keine Gesuche in dieser Kategorie gefunden
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="offers">
-          <div className="grid gap-4 md:grid-cols-2">
-            {filterByCategory(MOCK_OFFERS).map((item) => (
-              <HelpCard key={item.id} item={item} />
-            ))}
-          </div>
-          {filterByCategory(MOCK_OFFERS).length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              Keine Angebote in dieser Kategorie gefunden
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Info-Banner */}
-      <Card className="mt-8 bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
+        {/* Demo Info */}
+        <Card className="mt-8 p-4 bg-blue-50 border-blue-200">
           <p className="text-sm text-blue-900">
-            <strong>ℹ️ Demo-Modus:</strong> Dies ist eine Vorschau der Nachbarschaftshilfe-Funktion mit Beispieldaten. 
+            ℹ️ <strong>Demo-Modus:</strong> Dies ist eine Vorschau der Nachbarschaftshilfe-Funktion mit Beispieldaten. 
             Die vollständige Funktionalität mit Datenbank wird in Kürze verfügbar sein.
           </p>
-        </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
