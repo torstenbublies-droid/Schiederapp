@@ -2,11 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { 
-  Newspaper, Calendar, Building2, FileText, Wrench, 
-  Trash2, AlertTriangle, Palmtree, GraduationCap, 
-  HardHat, Users, Phone, Cloud, MessageCircle, Bell, X, UserPlus, Heart 
-} from "lucide-react";
+import { Heart, Newspaper, Calendar, Building2, FileText, Wrench, Trash2, AlertTriangle, Palmtree, GraduationCap, UserPlus, Users, Phone, MessageCircle, Bell, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChatBot from "@/components/ChatBot";
 import WeatherWidget from "@/components/WeatherWidget";
@@ -95,6 +91,7 @@ export default function Home() {
     { title: "Bildung & Familie", icon: <GraduationCap size={28} />, href: "/education", color: "bg-purple-600" },
     { title: "Vereine", icon: <UserPlus size={28} />, href: "/clubs", color: "bg-amber-600" },
     { title: "Nachbarschaftshilfe", icon: <Heart size={28} />, href: "/neighborhood-help", color: "bg-pink-600" },
+    { title: "Marktplatz", icon: <ShoppingBag size={28} />, href: "/marketplace", color: "bg-green-600" },
     { title: "Ratsinfos & Politik", icon: <Users size={28} />, href: "https://sessionnet.owl-it.de/schieder_schwalenberg/bi/info.asp", color: "bg-indigo-600" },
     { title: "Kontakt & Anliegen", icon: <Phone size={28} />, href: "/contact", color: "bg-primary" },
 

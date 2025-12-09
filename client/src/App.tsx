@@ -28,6 +28,7 @@ import AdminContact from "./pages/AdminContact";
 import AdminNotifications from "./pages/AdminNotifications";
 import Notifications from "./pages/Notifications";
 import NeighborhoodHelp from "./pages/NeighborhoodHelp";
+import Marketplace from "./pages/Marketplace";
 
 import { useNotificationListener } from "./hooks/useNotificationListener";
 import Header from "./components/Header";
@@ -59,6 +60,7 @@ function Router() {
       <Route path={"/admin/notifications"} component={AdminNotifications} />
       <Route path={"/notifications"} component={Notifications} />
       <Route path={"/neighborhood-help"} component={NeighborhoodHelp} />
+      <Route path={"/marketplace"} component={Marketplace} />
 
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
