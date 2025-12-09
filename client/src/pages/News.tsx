@@ -70,11 +70,11 @@ const newsData: NewsItem[] = [
   },
   {
     id: 6,
-    title: "Inkrafttreten des Bebauungsplanes 01/31 „Südufer SchiederSee II"",
+    title: "Inkrafttreten des Bebauungsplanes 01/31 'Südufer SchiederSee II'",
     date: "22.10.2025",
     category: "Bauen & Stadtplanung",
-    excerpt: "Der Bebauungsplan 01/31 „Südufer SchiederSee II" ist in Kraft getreten.",
-    content: "Der Bebauungsplan 01/31 „Südufer SchiederSee II" der Stadt Schieder-Schwalenberg gemäß § 10 Abs. 1 Baugesetzbuch (BauGB) vom 22.10.2025 ist in Kraft getreten. Der Plan kann im Rathaus eingesehen werden.",
+    excerpt: "Der Bebauungsplan 01/31 'Südufer SchiederSee II' ist in Kraft getreten.",
+    content: "Der Bebauungsplan 01/31 'Südufer SchiederSee II' der Stadt Schieder-Schwalenberg gemäß § 10 Abs. 1 Baugesetzbuch (BauGB) vom 22.10.2025 ist in Kraft getreten. Der Plan kann im Rathaus eingesehen werden.",
     image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
     location: "Südufer SchiederSee",
     icon: <Building className="text-blue-600" size={20} />
