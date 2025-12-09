@@ -24,7 +24,6 @@ const newsData: NewsItem[] = [
     category: "Rathaus & Politik",
     excerpt: "Infolge des Klimawandels hat die Anzahl von Starkregenereignissen zugenommen. Die Stadt lädt zur Informationsveranstaltung ein.",
     content: "Infolge des Klimawandels in den vergangenen Jahren hat die Anzahl von Starkregenereignissen nicht nur zugenommen. Starkregen tritt, teils mit hohen Schäden, auch in stärkerem Ausmaß auf als bisher. Die Stadt hat aus diesem Grund im Jahr 2023 die Aufstellung eines örtlichen Starkregenkonzeptes beschlossen. Die Veranstaltung findet am Mittwoch, den 17. Dezember, um 18:00 Uhr im Bürgersaal, Rathaus Domäne 3, 1.OG im Ortsteil Schieder statt.",
-    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=800&q=80",
     location: "Bürgersaal, Rathaus Domäne 3",
     icon: <Droplets className="text-blue-600" size={20} />
   },
@@ -35,7 +34,6 @@ const newsData: NewsItem[] = [
     category: "Bürger-Service",
     excerpt: "Ab dem 22. November werden die Wasser- und Abwasserzähler durch Bevollmächtigte der Stadt abgelesen.",
     content: "Die Stadt Schieder-Schwalenberg weist darauf hin, dass die Wasser- und Abwasserzähler im Stadtgebiet ab dem 22. November durch Bevollmächtigte der Stadt Schieder-Schwalenberg abgelesen werden. Die Bevollmächtigten können sich entsprechend ausweisen. Um die Verbrauchsabrechnung für das Jahr 2025 rechtzeitig erstellen zu können, müssen alle Zählerdaten bis zum 20. Dezember bei der Stadt eingegangen sein.",
-    image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80",
     icon: <Droplets className="text-cyan-600" size={20} />
   },
   {
@@ -45,7 +43,6 @@ const newsData: NewsItem[] = [
     category: "Verkehr & Bauen",
     excerpt: "Verkehrseinschränkungen in Glashütte ab 18.11.2025 aufgrund von Bauarbeiten.",
     content: "Aufgrund von Bauarbeiten kommt es ab dem 18. November 2025 zu Verkehrseinschränkungen im Ortsteil Glashütte. Bitte beachten Sie die Beschilderung vor Ort und planen Sie ggf. mehr Zeit für Ihre Fahrt ein.",
-    image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80",
     icon: <Construction className="text-orange-600" size={20} />
   },
   {
@@ -55,7 +52,6 @@ const newsData: NewsItem[] = [
     category: "Rathaus & Politik",
     excerpt: "Änderung der Satzung des Zweckverbandes Ostwestfalen-Lippe-IT wurde beschlossen.",
     content: "Die 1. Änderung der Satzung des Zweckverbandes Ostwestfalen-Lippe-IT wurde vom Rat beschlossen und tritt mit sofortiger Wirkung in Kraft.",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
     icon: <FileText className="text-indigo-600" size={20} />
   },
   {
@@ -65,7 +61,6 @@ const newsData: NewsItem[] = [
     category: "Familie & Soziales",
     excerpt: "Das Anmeldeverfahren für das Kindergartenjahr 2026/2027 hat begonnen.",
     content: "Eltern können ihre Kinder ab sofort für das Kindergartenjahr 2026/2027 anmelden. Die Anmeldung erfolgt über das zentrale Online-Portal der Stadt. Weitere Informationen erhalten Sie im Familienbüro.",
-    image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&q=80",
     icon: <Baby className="text-pink-600" size={20} />
   },
   {
@@ -75,7 +70,6 @@ const newsData: NewsItem[] = [
     category: "Bauen & Stadtplanung",
     excerpt: "Der Bebauungsplan 01/31 'Südufer SchiederSee II' ist in Kraft getreten.",
     content: "Der Bebauungsplan 01/31 'Südufer SchiederSee II' der Stadt Schieder-Schwalenberg gemäß § 10 Abs. 1 Baugesetzbuch (BauGB) vom 22.10.2025 ist in Kraft getreten. Der Plan kann im Rathaus eingesehen werden.",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
     location: "Südufer SchiederSee",
     icon: <Building className="text-blue-600" size={20} />
   },
@@ -86,7 +80,6 @@ const newsData: NewsItem[] = [
     category: "Bürger-Service",
     excerpt: "Information über zulässige Datenübermittlungen gemäß Bundesmeldegesetz.",
     content: "Gemäß § 42 und § 50 des Bundesmeldegesetzes (BMG) und gemäß § 58c des Soldatengesetzes (SG) sind folgende Datenübermittlungen durch die Stadt Schieder-Schwalenberg als Meldebehörde zulässig. Weitere Details finden Sie in der vollständigen Bekanntmachung.",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
     icon: <FileText className="text-gray-600" size={20} />
   },
   {
@@ -96,7 +89,6 @@ const newsData: NewsItem[] = [
     category: "Rathaus & Politik",
     excerpt: "Das offizielle Ergebnis der Bürgermeister-Stichwahl wurde bekanntgegeben.",
     content: "Nachdem der Wahlausschuss das Ergebnis der Stichwahl des Bürgermeisters festgestellt hat, wird dieses gemäß § 35 und 46b des Kommunalwahlgesetzes (KWahlG) i.V.m. § 63 und 75a der Kommunalwahlordnung (KWahlO) hiermit bekanntgegeben.",
-    image: "https://images.unsplash.com/photo-1495316364083-b5bf2b2ad0d2?w=800&q=80",
     icon: <Vote className="text-red-600" size={20} />
   },
   {
@@ -106,7 +98,6 @@ const newsData: NewsItem[] = [
     category: "Rathaus & Politik",
     excerpt: "Die detaillierten Wahlergebnisse zur Stichwahl sind nun verfügbar.",
     content: "Die Wahlergebnisse zur Stichwahl in Schieder-Schwalenberg können Sie hier einsehen. Am 28. September um 18 Uhr schlossen die Wahllokale, anschließend erfolgte die Auszählung.",
-    image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=800&q=80",
     icon: <Vote className="text-purple-600" size={20} />
   },
   {
@@ -116,7 +107,6 @@ const newsData: NewsItem[] = [
     category: "Rathaus & Politik",
     excerpt: "Information zur Stichwahl am 28. September 2025 mit Briefwahl-Möglichkeit.",
     content: "Am 28. September 2025 findet die Stichwahl zur Wahl des Landrates und des Bürgermeisters statt. Sie können Ihre Stimme auch per Briefwahl abgeben. Briefwahlunterlagen können im Rathaus beantragt werden.",
-    image: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80",
     icon: <Vote className="text-blue-600" size={20} />
   }
 ];
@@ -158,13 +148,6 @@ export default function News() {
         </div>
 
         <div className="container py-8 max-w-4xl">
-          {selectedNews.image && (
-            <img 
-              src={selectedNews.image} 
-              alt={selectedNews.title}
-              className="w-full h-64 object-cover rounded-lg mb-6"
-            />
-          )}
           
           {selectedNews.location && (
             <div className="flex items-center gap-2 text-muted-foreground mb-4">
@@ -224,17 +207,7 @@ export default function News() {
                 className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => setSelectedNews(news)}
               >
-                <div className="md:flex">
-                  {news.image && (
-                    <div className="md:w-1/3">
-                      <img 
-                        src={news.image} 
-                        alt={news.title}
-                        className="w-full h-48 md:h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6 md:w-2/3">
+                <div className="p-6">
                     <div className="flex items-center gap-2 mb-2">
                       {news.icon}
                       <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
@@ -257,7 +230,6 @@ export default function News() {
                         <span>{news.location}</span>
                       </div>
                     )}
-                  </div>
                 </div>
               </Card>
             ))}
