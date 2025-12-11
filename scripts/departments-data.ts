@@ -7,7 +7,7 @@ export const departmentsData = [
         position: "Bürgermeister",
         phone: "05282 / 601-11",
         fax: "05282 / 601-911",
-        email: "marco.muellers@schieder-schwalenberg.de",
+        email: "m.muellers@schieder-schwalenberg.de",
         room: "Raum 4",
         address: "Domäne 3, 32816 Schieder-Schwalenberg"
       }

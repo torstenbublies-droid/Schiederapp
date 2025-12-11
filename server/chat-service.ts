@@ -202,7 +202,7 @@ ${knowledgeBase}
 ${contextData}
 
 === WICHTIGE FAKTEN ===
-- Der aktuelle Bürgermeister ist Marco Müllers (E-Mail: marco.muellers@schieder-schwalenberg.de)
+- Der aktuelle Bürgermeister ist Marco Müllers (E-Mail: m.muellers@schieder-schwalenberg.de)
 - Rathaus: Domäne 3, 32816 Schieder-Schwalenberg, Tel: 05282 / 601-0
 - Öffnungszeiten Rathaus: Mo-Fr 08:00-12:00 Uhr, Do 14:00-17:00 Uhr
 
